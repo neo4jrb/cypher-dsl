@@ -111,7 +111,7 @@ module CypherDSL
         case clause
         when Clauses::Match then render_match(clause)
         when Clauses::With then render_with(clause)
-        when Clauses::Return then render_projection('RETURN', clause, nil)
+        when Clauses::Return then render_projection('RETURN', clause)
         when Clauses::RawReturn then clause.items.map { |item| render_projection_item(item) }.join(', ')
         when Clauses::Create then "CREATE #{render_pattern_elements(clause.pattern_elements)}"
         when Clauses::Merge then render_merge(clause)
@@ -305,9 +305,16 @@ module CypherDSL
 
       # WITH ends a query part: only the names it projects stay in scope, so a
       # node that is not carried over renders with its labels again afterwards.
+      # The projected names are already known to the clause's own WHERE, next to
+      # the names of the part it ends: `WITH n AS m WHERE (m)-->()`. A `*` keeps
+      # the whole current scope.
       def render_with(clause)
-        rendered = render_projection('WITH', clause, clause.where)
-        @visited_names = clause.items.include?(Asterisk::INSTANCE) ? @visited_names : exported_names(clause.items)
+        projection = render_projection('WITH', clause)
+        exported = exported_names(clause.items)
+        exported.merge(@visited_names) if clause.items.include?(Asterisk::INSTANCE)
+        @visited_names.merge(exported)
+        rendered = "#{projection}#{render_where(clause.where)}"
+        @visited_names = exported
         rendered
       end
 
@@ -321,13 +328,13 @@ module CypherDSL
         end.to_set
       end
 
-      def render_projection(keyword, clause, where)
+      def render_projection(keyword, clause)
         items = clause.items.map { |item| render_projection_item(item) }.join(', ')
         parts = ["#{keyword} #{'DISTINCT ' if clause.distinct}#{items}"]
         parts << "ORDER BY #{clause.order.items.map { |item| render_sort_item(item) }.join(', ')}" if clause.order
         parts << "SKIP #{render_expression(clause.skip)}" if clause.skip
         parts << "LIMIT #{render_expression(clause.limit)}" if clause.limit
-        "#{parts.join(' ')}#{render_where(where)}"
+        parts.join(' ')
       end
 
       # In RETURN/WITH an aliased expression is defined once (`expr AS alias`);

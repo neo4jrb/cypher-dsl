@@ -53,6 +53,42 @@ module CypherDSL
                        .returning(:m).build.cypher
         expect(cypher).to eq('MATCH (n) WITH n AS m MATCH (o) WHERE (m)-->(o) RETURN m')
       end
+
+      # The following cases were contributed in PR #3 (closed in favour of PR #2).
+      context 'with the cases of PR #3' do
+        let(:condition) { Cypher.any_node(:m).relationship_to(Cypher.any_node) }
+        let(:statement) { Cypher.match(n).with(n.as(:m)).where(condition).returning(:m).build }
+
+        it 'keeps aliases projected with distinct' do
+          cypher = Cypher.match(n).with_distinct(n.as(:m)).where(condition).returning(:m).build.cypher
+          expect(cypher).to eq('MATCH (n) WITH DISTINCT n AS m WHERE (m)-->() RETURN m')
+        end
+
+        it 'keeps projected relationship aliases in relationship predicates' do
+          relationship = n.relationship_to(Cypher.any_node, 'KNOWS').named(:r)
+          predicate = n.relationship_to(Cypher.any_node).named(:s)
+          cypher = Cypher.match(relationship).with(n, relationship.as(:s)).where(predicate).returning(:s).build.cypher
+          expect(cypher).to eq('MATCH (n)-[r:`KNOWS`]->() WITH n, r AS s WHERE (n)-[s]->() RETURN s')
+        end
+
+        it 'resolves generated aliases before rendering where' do
+          config = Renderer::Configuration.new_config.with_generated_names(true).build
+          expect(Renderer.get_renderer(config).render(statement))
+            .to eq('MATCH (v0) WITH v0 AS v1 WHERE (v1)-->() RETURN v1')
+        end
+
+        it 'escapes projected aliases in relationship predicates' do
+          name = 'node alias'
+          predicate = Cypher.any_node(name).relationship_to(Cypher.any_node)
+          cypher = Cypher.match(n).with(n.as(name)).where(predicate).returning(Cypher.name(name)).build.cypher
+          expect(cypher).to eq('MATCH (n) WITH n AS `node alias` WHERE (`node alias`)-->() RETURN `node alias`')
+        end
+
+        it 'preserves the where line when pretty printing' do
+          config = Renderer::Configuration.new(pretty_print: true)
+          expect(Renderer.get_renderer(config).render(statement)).to eq("MATCH (n)\nWITH n AS m\nWHERE (m)-->()\nRETURN m")
+        end
+      end
     end
   end
 end

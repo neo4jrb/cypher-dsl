@@ -30,6 +30,15 @@ module CypherDSL
         expect(cypher).to eq('MATCH (n), (m) WITH n AS x, m WHERE (n)-->(m) RETURN x')
       end
 
+      it 'keeps the alias next to the whole scope when the WITH also projects *' do
+        cypher = Cypher.match(n).with(Cypher.asterisk, n.as(:m))
+                       .where(Cypher.any_node(:m).relationship_to(n))
+                       .match(Cypher.any_node(:o))
+                       .where(Cypher.any_node(:m).relationship_to(n).relationship_to(Cypher.any_node(:o)))
+                       .returning(:m).build.cypher
+        expect(cypher).to eq('MATCH (n) WITH *, n AS m WHERE (m)-->(n) MATCH (o) WHERE (m)-->(n)-->(o) RETURN m')
+      end
+
       it 'forgets the alias after a later WITH that does not carry it' do
         cypher = Cypher.match(n).with(n.as(:m)).with(Cypher.count(Cypher.asterisk).as(:c))
                        .match(Cypher.any_node(:o))

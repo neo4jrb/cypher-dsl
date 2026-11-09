@@ -12,6 +12,7 @@
     <orderEntry type="jdk" jdkName="RVM: ruby-4.0.7" jdkType="RUBY_SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="ast (v2.4.3, RVM: ruby-4.0.7) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="bundler (v4.0.18, RVM: ruby-4.0.7) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="diff-lcs (v1.6.2, RVM: ruby-4.0.7) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="json (v3.1.0, RVM: ruby-4.0.7) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="language_server-protocol (v3.17.0.6, RVM: ruby-4.0.7) [gem]" level="application" />
@@ -30,6 +31,7 @@
     <orderEntry type="library" scope="PROVIDED" name="rspec-support (v3.13.7, RVM: ruby-4.0.7) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="rubocop (v1.92.2, RVM: ruby-4.0.7) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="rubocop-ast (v1.50.0, RVM: ruby-4.0.7) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rubocop-rspec (v3.10.2, RVM: ruby-4.0.7) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="ruby-progressbar (v1.13.0, RVM: ruby-4.0.7) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="unicode-display_width (v3.3.0, RVM: ruby-4.0.7) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="unicode-emoji (v4.3.0, RVM: ruby-4.0.7) [gem]" level="application" />

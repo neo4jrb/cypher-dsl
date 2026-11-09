@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A name projected by `WITH` is visible to that clause's own `WHERE`, so a pattern condition
+  keeps it: `WITH n AS m WHERE (m)-->()` no longer renders as `WHERE ()-->()` (#1).
+
 ## [0.1.0.alpha.3] - 2026-11-01
 
 The release activegraph's `ActiveGraph::Core::Query` builds on.

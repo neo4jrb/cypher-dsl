@@ -305,9 +305,15 @@ module CypherDSL
 
       # WITH ends a query part: only the names it projects stay in scope, so a
       # node that is not carried over renders with its labels again afterwards.
+      # The projected names are already known to the clause's own WHERE, next to
+      # the names of the part it ends: `WITH n AS m WHERE (m)-->()`.
       def render_with(clause)
-        rendered = render_projection('WITH', clause, clause.where)
-        @visited_names = clause.items.include?(Asterisk::INSTANCE) ? @visited_names : exported_names(clause.items)
+        exported = nil
+        rendered = render_projection('WITH', clause, clause.where) do
+          exported = exported_names(clause.items) unless clause.items.include?(Asterisk::INSTANCE)
+          @visited_names.merge(exported) if exported
+        end
+        @visited_names = exported || @visited_names
         rendered
       end
 
@@ -321,8 +327,10 @@ module CypherDSL
         end.to_set
       end
 
+      # The block runs once the items are rendered, before anything that may refer to them.
       def render_projection(keyword, clause, where)
         items = clause.items.map { |item| render_projection_item(item) }.join(', ')
+        yield if block_given?
         parts = ["#{keyword} #{'DISTINCT ' if clause.distinct}#{items}"]
         parts << "ORDER BY #{clause.order.items.map { |item| render_sort_item(item) }.join(', ')}" if clause.order
         parts << "SKIP #{render_expression(clause.skip)}" if clause.skip

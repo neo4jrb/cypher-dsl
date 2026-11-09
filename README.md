@@ -138,7 +138,7 @@ The flags are `entity_names`, `parameter_names`, `all_aliases`, `internal_aliase
 Pre-releases are not picked up by a bare requirement, so name the version:
 
 ```ruby
-gem 'cypher-dsl', '0.1.0.alpha.3'
+gem 'cypher-dsl', '0.1.0'
 ```
 
 Requires Ruby 3.4 or newer.

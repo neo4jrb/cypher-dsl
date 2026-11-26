@@ -1,0 +1,35 @@
+module CypherDSL
+  class Renderer
+    # Target Cypher dialects, mirroring the Java enum.
+    #
+    # - NEO4J_4: `CALL { WITH imports … }` subqueries, `shortestPath()` functions,
+    #   `exists(n.prop)`, `distance()`, `elementId(x)` rendered as `toString(id(x))`.
+    # - NEO4J_5: as above with native `elementId`, `point.distance()` and `n.prop IS NOT NULL`.
+    # - NEO4J_5_23: `CALL (imports) { … }` subqueries and `SHORTEST k` path selectors.
+    # - NEO4J_5_26: adds dynamic labels (`n:$($labels)`) and the `CYPHER 5` prefix.
+    # - NEO4J_5_DEFAULT_CYPHER (default): like NEO4J_5_26 without the prefix.
+    # - NEO4J_5_CYPHER_5 / NEO4J_5_CYPHER_25: with an explicit `CYPHER 5` / `CYPHER 25` prefix.
+    # - NEO4J_2025: like NEO4J_5_23.
+    module Dialect
+      # One of {ALL}; {Configuration} validates its `dialect` option against that list.
+      type name = :neo4j4 | :neo4j5 | :neo4j5_23 | :neo4j5_26 | :neo4j5_default_cypher | :neo4j5_cypher_5
+                | :neo4j5_cypher_25 | :neo4j2025
+
+      NEO4J_4: name
+      NEO4J_5: name
+      NEO4J_5_23: name
+      NEO4J_5_26: name
+      NEO4J_5_DEFAULT_CYPHER: name
+      NEO4J_5_CYPHER_5: name
+      NEO4J_5_CYPHER_25: name
+      NEO4J_2025: name
+
+      ALL: Array[name]
+      LEGACY_SUBQUERY_SYNTAX: Array[name]
+      LEGACY_PATH_SELECTORS: Array[name]
+      DYNAMIC_LABELS: Array[name]
+      # The `CYPHER 5 ` / `CYPHER 25 ` statement prefix of the dialects that have one.
+      PREFIXES: Hash[name, String]
+    end
+  end
+end

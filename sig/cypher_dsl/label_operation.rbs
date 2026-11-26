@@ -1,0 +1,20 @@
+module CypherDSL
+  # `n:Label:Other` or `n:$($labels)` as the target of SET or REMOVE; `remove`
+  # marks an operation built for REMOVE, which a SET clause rejects.
+  class LabelOperation
+    # The node or the name standing for it.
+    attr_reader node: Expression
+
+    attr_reader labels: Array[String | Labels]
+
+    attr_reader remove: bool
+
+    def initialize: (Expression node, Array[String | Symbol | Labels] labels, ?remove: bool) -> void
+
+    def remove?: () -> bool
+
+    private
+
+    def updatable: (Labels labels) -> Labels
+  end
+end

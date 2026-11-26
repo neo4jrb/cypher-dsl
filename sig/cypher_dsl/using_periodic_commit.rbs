@@ -1,0 +1,14 @@
+module CypherDSL
+  # `Cypher.using_periodic_commit(500).load_csv(uri).as(:line)`: the legacy
+  # `USING PERIODIC COMMIT [rate]` prefix of a LOAD CSV statement.
+  class UsingPeriodicCommit < Data
+    attr_reader rate: Integer?
+
+    def self.new: (rate: Integer?) -> instance
+               | (Integer? rate) -> instance
+
+    def with: (?rate: Integer?) -> instance
+
+    def load_csv: (String | Symbol uri, ?bool positional_headers, ?with_headers: bool) -> StatementBuilder::OngoingLoadCsv
+  end
+end

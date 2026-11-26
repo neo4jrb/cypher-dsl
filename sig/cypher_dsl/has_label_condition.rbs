@@ -1,0 +1,11 @@
+module CypherDSL
+  # The label predicate `n:Label:Other`.
+  class HasLabelCondition < Condition
+    # The node or the name standing for it.
+    attr_reader node: Expression
+
+    attr_reader labels: Array[String | Labels]
+
+    def initialize: (Expression node, Array[String | Symbol | Labels] labels) -> void
+  end
+end

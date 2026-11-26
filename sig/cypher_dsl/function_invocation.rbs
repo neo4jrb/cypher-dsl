@@ -1,0 +1,17 @@
+module CypherDSL
+  # A function call such as `size((a)-->())` or `count(n)`.
+  class FunctionInvocation
+    include Expression
+
+    # The functions that accept `DISTINCT`, lower-cased.
+    AGGREGATES: Array[String]
+
+    attr_reader function_name: String
+
+    attr_reader arguments: Array[Expression]
+
+    attr_reader distinct: bool
+
+    def initialize: (String function_name, Array[Expression] arguments, ?distinct: bool) -> void
+  end
+end

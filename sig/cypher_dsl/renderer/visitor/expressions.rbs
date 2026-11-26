@@ -1,0 +1,96 @@
+module CypherDSL
+  class Renderer
+    class Visitor
+      # Rendering of expressions, conditions, operations, functions and subquery expressions.
+      module Expressions : _VisitorInternals
+        @configuration: Configuration
+        @visited_names: Set[String]
+        @names: NameResolver
+        @renamed_parameters: Hash[String, String]
+        # untyped: parameter values are arbitrary host data; see {StatementCatalog.from_uses}.
+        @parameter_uses: Hash[String, Array[untyped]]
+        @anonymous_parameters: Array[Parameter]
+        @level: Integer
+
+        # --- shared with the visitor and the other mixins (private in Ruby, see _VisitorInternals) ---
+
+        def render_expression: (renderable expression) -> String
+
+        # Verbatim text with its embedded expressions rendered (and their parameters collected).
+        def render_raw: (RawExpression raw) -> String
+
+        def render_literal: (literal_value value) -> String
+
+        # Renders with the current scope, discarding names introduced inside.
+        def render_in_own_scope: [T] () { () -> T } -> T
+
+        def escape_schema_name: (String name) -> String
+
+        private
+
+        def render_case: (CaseExpression case_expression) -> String
+
+        # untyped: a `ListOperator`; `start_index` is non-nil unless `slice`, which Steep cannot
+        # derive from the flag.
+        def render_list_operator: (untyped operator) -> String
+
+        def render_container_expression: (renderable expression) -> String
+
+        def render_reduction: (Reduction reduction) -> String
+
+        def render_labels: (Expression node, Array[String | Labels] labels) -> String
+
+        def render_condition_or_operation: (renderable expression) -> String
+
+        def render_operation: (Operation operation) -> String
+
+        # A plain relationship pattern uses the `exists()` function; quantified
+        # patterns and statements need the `EXISTS { }` subquery form.
+        def render_exists: (ExistsCondition condition) -> String
+
+        # A pattern body renders bare; with imports it needs a MATCH after the WITH.
+        # untyped: a `CountExpression`; its body is told apart by `pattern_body?`, a predicate Steep
+        # cannot narrow by.
+        def render_count: (untyped count) -> String
+
+        def pattern_body?: (Statement | pattern_element body) -> bool
+
+        def quantified?: (pattern_element pattern) -> bool
+
+        # The predicate's variable is in scope inside its WHERE.
+        def render_list_predicate: (ListPredicate predicate) -> String
+
+        def with_names_in_scope: [T] (Array[String] names) { () -> T } -> T
+
+        def render_map_projection: (MapProjection projection) -> String
+
+        # A pattern comprehension is its own scope: names it introduces do not
+        # count as visited outside of it.
+        # untyped: a `PatternComprehension`; its `projection` is set once `returning` was called,
+        # which rendering presupposes.
+        def render_pattern_comprehension: (untyped comprehension) -> String
+
+        # untyped: a `ListComprehension`; its `list` is set once `in` was called, which rendering
+        # presupposes.
+        def render_list_comprehension: (untyped comprehension) -> String
+
+        # Records every use for the catalog; anonymous parameters get `pcdslNN`,
+        # shared between anonymous parameters with equal values.
+        # untyped: a `Parameter`; its `name` is nil exactly when `anonymous?`, which Steep cannot
+        # derive from the predicate.
+        def render_parameter: (untyped parameter) -> String
+
+        def anonymous_parameter_name: (Parameter parameter) -> String
+
+        def render_property: (Property property) -> String
+
+        def render_map: (MapExpression map) -> String
+
+        # Comma separated entries, one per indented line when pretty printing.
+        def render_entries: (String opening, String closing) { () -> Array[String] } -> String
+
+        def render_function_invocation: (FunctionInvocation invocation) -> String
+      end
+    end
+  end
+end

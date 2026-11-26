@@ -1,0 +1,98 @@
+module CypherDSL
+  # Mixed into everything that can appear where Cypher expects an expression.
+  # Provides the fluent condition, alias and sort helpers of the Java API.
+  module Expression
+    # Coerces a plain Ruby value into an expression; expressions pass through.
+    def self.coerce: (expression_like value) -> Expression
+
+    def as: (name_like alias_name) -> AliasedExpression
+
+    # The expression as Cypher, names escaped only when necessary (as the Java `toString`).
+    def to_s: () -> String
+
+    # A property of this expression's value, e.g. `$param.key` or `datetime().epochSeconds`.
+    def property: (*Property::name_like names) -> Property
+
+    # This expression as a condition, e.g. a CASE expression in WHERE.
+    def as_condition: () -> ExpressionCondition
+
+    def ascending: () -> SortItem
+
+    def descending: () -> SortItem
+
+    def is_equal_to: (expression_like other) -> Comparison
+
+    def is_not_equal_to: (expression_like other) -> Comparison
+
+    def lt: (expression_like other) -> Comparison
+
+    def lte: (expression_like other) -> Comparison
+
+    def gt: (expression_like other) -> Comparison
+
+    def gte: (expression_like other) -> Comparison
+
+    def matches: (expression_like other) -> Comparison
+
+    def starts_with: (expression_like other) -> Comparison
+
+    def ends_with: (expression_like other) -> Comparison
+
+    def contains: (expression_like other) -> Comparison
+
+    def is_null: () -> Comparison
+
+    def is_not_null: () -> Comparison
+
+    def is_true: () -> Comparison
+
+    def is_false: () -> Comparison
+
+    def in: (expression_like haystack) -> Comparison
+
+    # `size(self)`, `size(self) = n` and `size(self) = 0`.
+    def size: () -> FunctionInvocation
+
+    def has_size: (expression_like expected) -> Comparison
+
+    def is_empty: () -> Comparison
+
+    # `all(x IN list WHERE x IN self)` / `any(…)`: does this list contain all / any of the elements?
+    def includes_all: (expression_like list) -> ListPredicate
+
+    def includes_any: (expression_like list) -> ListPredicate
+
+    # Arithmetic; rendered in parentheses, e.g. `(a + b)`.
+    def add: (expression_like other) -> Operation
+
+    def subtract: (expression_like other) -> Operation
+
+    def multiply: (expression_like other) -> Operation
+
+    def divide: (expression_like other) -> Operation
+
+    def remainder: (expression_like other) -> Operation
+
+    def pow: (expression_like other) -> Operation
+
+    def concat: (expression_like other) -> Operation
+
+    # Java short forms.
+    alias eq is_equal_to
+
+    alias ne is_not_equal_to
+
+    # Arel spellings, each mapping to exactly one of the above.
+    alias not_eq is_not_equal_to
+
+    alias gteq gte
+
+    alias lteq lte
+
+    alias asc ascending
+
+    alias desc descending
+
+    def not_in: (expression_like haystack) -> Condition
+  end
+end

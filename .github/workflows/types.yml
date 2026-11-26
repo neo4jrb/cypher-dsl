@@ -1,0 +1,30 @@
+name: Types
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore: [ '**/*.md' ]
+  pull_request:
+    paths-ignore: [ '**/*.md' ]
+
+permissions:
+  contents: read
+
+jobs:
+  steep:
+    name: rbs + steep
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - name: Install the RBS collection
+        run: bundle exec rbs collection install
+      - name: Validate signatures
+        run: bundle exec rbs -I sig validate
+      - name: Type check
+        run: bundle exec steep check

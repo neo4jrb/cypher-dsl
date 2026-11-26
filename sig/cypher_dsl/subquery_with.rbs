@@ -1,0 +1,18 @@
+module CypherDSL
+  # `Cypher.subquery_with(imports…)`: imports for an EXISTS or COLLECT subquery,
+  # rendered as a leading `WITH` inside the braces.
+  class SubqueryWith
+    # A subquery body: a statement, or a pattern for EXISTS / COUNT.
+    type subquery_body = Statement | pattern_element
+
+    @imports: Array[Expression]
+
+    def initialize: (Array[expression_like] imports) -> void
+
+    def collect: (Statement statement) -> CollectExpression
+
+    def count: (subquery_body statement_or_pattern) -> CountExpression
+
+    def exists: (subquery_body statement_or_pattern) -> ExistsCondition
+  end
+end

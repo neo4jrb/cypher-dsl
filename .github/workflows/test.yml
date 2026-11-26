@@ -11,18 +11,76 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  rspec:
+    name: rspec (${{ matrix.ruby }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         ruby: [ '3.4', 'ruby', 'jruby' ]
+    env:
+      # Measure coverage once, on the oldest supported MRI; the diff-coverage
+      # job below gates the changed lines of a PR on it.
+      COVERAGE: ${{ matrix.ruby == '3.4' && '1' || '' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - run: bundle exec rspec
-      - run: bundle exec rubocop
-        if: matrix.ruby == 'ruby'
+      - name: Run RSpec
+        run: bundle exec rspec
+      - name: Upload coverage
+        if: ${{ always() && env.COVERAGE == '1' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.ruby }}
+          path: coverage/.resultset.json
+          # .resultset.json is a dotfile; upload-artifact@v4 skips hidden files by default.
+          include-hidden-files: true
+          retention-days: 1
+          if-no-files-found: ignore
+
+  # Enforce 100% coverage on the lib/ lines a PR adds or changes. PR-only: a
+  # diff needs a base branch.
+  diff-coverage:
+    name: diff-coverage
+    needs: [rspec]
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - name: Fetch PR base
+        run: git fetch --no-tags --depth=1 origin ${{ github.base_ref }}
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage
+      - name: Enforce diff coverage
+        env:
+          COVERAGE_BASE: origin/${{ github.base_ref }}
+        run: bundle exec rake coverage:enforce
+
+  # Stable, version-free gate for branch protection: require `rspec-success`
+  # instead of the matrix legs, so bumping the matrix never strips the requirement.
+  rspec-success:
+    name: rspec-success
+    needs: [rspec]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require the rspec matrix to pass
+        if: ${{ needs.rspec.result != 'success' }}
+        run: |
+          echo "rspec matrix result: ${{ needs.rspec.result }}"
+          exit 1

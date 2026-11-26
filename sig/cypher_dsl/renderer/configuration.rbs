@@ -1,0 +1,142 @@
+module CypherDSL
+  class Renderer
+    # Rendering options.
+    #
+    # - `always_escape_names`: backtick-escape labels and relationship types even
+    #   when they are plain identifiers, as the Java default renderer does.
+    # - `dialect`: one of {Dialect::ALL}.
+    # - `pretty_print`: one clause per line, indented subqueries, conditions and maps.
+    # - `indent_size` / `indent_style` (`:space` or `:tab`): the indentation unit.
+    # - `disable_dynamic_labels`: render label expressions statically even on dialects
+    #   that support `n:$($labels)`.
+    # - `generated_names`: rewrite names while rendering (`v0`, `v1`, … and `p0`, `p1`, …);
+    #   `true` for all of {GENERATED_NAMES}, or a subset of those flags.
+    class Configuration
+      # One flag of {GENERATED_NAMES}, the Java `GeneratedNames` enum.
+      type generated_name = :entity_names | :parameter_names | :all_aliases | :internal_aliases_only | :reuse_aliases
+
+      # The `generated_names` option as given: `true` for every flag, `false` or `nil` for none,
+      # or a list of flags (symbols or strings).
+      type generated_names_option = bool | nil | Enumerable[generated_name | String]
+
+      type indent_style = :space | :tab
+
+      # Every option by name, as {#to_h} returns it.
+      type options = {
+        always_escape_names: bool,
+        dialect: Dialect::name,
+        pretty_print: bool,
+        indent_size: Integer,
+        indent_style: indent_style,
+        disable_dynamic_labels: bool,
+        generated_names: Set[generated_name]
+      }
+
+      # The default configuration, as used by `Statement#cypher`.
+      self.@default: Configuration?
+
+      @always_escape_names: bool
+      @dialect: Dialect::name
+      @pretty_print: bool
+      @indent_size: Integer
+      @indent_style: indent_style
+      @disable_dynamic_labels: bool
+      @generated_names: Set[generated_name]
+
+      # The Java `GeneratedNames` enum: which names get rewritten. `reuse_aliases` makes an alias
+      # that is defined again reuse its generated name instead of getting a new one.
+      # Every element is a `generated_name`; typed `Array[Symbol]` because Steep infers `%i[]` as such.
+      GENERATED_NAMES: Array[Symbol]
+
+      attr_reader always_escape_names: bool
+      attr_reader dialect: Dialect::name
+      attr_reader pretty_print: bool
+      attr_reader indent_size: Integer
+      attr_reader indent_style: indent_style
+      attr_reader disable_dynamic_labels: bool
+      # The flags in effect; empty unless generated names were asked for.
+      attr_reader generated_names: Set[generated_name]
+
+      # `always_escape_names` defaults to true, except when pretty printing, where
+      # names are escaped only when necessary (as upstream does).
+      def initialize: (?always_escape_names: bool?, ?dialect: Dialect::name, ?pretty_print: bool, ?indent_size: Integer,
+                       ?indent_style: indent_style, ?disable_dynamic_labels: bool,
+                       ?generated_names: generated_names_option) -> void
+
+      def use_generated_names?: () -> bool
+
+      # Every option by name; configurations with equal options are equal.
+      def to_h: () -> options
+
+      def ==: (untyped other) -> bool
+
+      alias eql? ==
+
+      def hash: () -> Integer
+
+      # The default configuration, as used by `Statement#cypher`.
+      def self.default: () -> Configuration
+
+      # Mirrors `Configuration.newConfig()…build()`.
+      def self.new_config: () -> Builder
+
+      # Mirrors `Configuration.prettyPrinting()`: pretty printed, names escaped only when needed.
+      def self.pretty_printing: () -> Configuration
+
+      # `CALL { WITH imports … }` (older dialects) rather than `CALL (imports) { … }`.
+      def legacy_subquery_syntax?: () -> bool
+
+      # `shortestPath()` / `allShortestPaths()` functions rather than `SHORTEST 1` / `ALL SHORTEST` selectors.
+      def legacy_path_selectors?: () -> bool
+
+      # `exists(n.prop)` and `distance()` rather than `n.prop IS NOT NULL` and `point.distance()`.
+      def legacy_functions?: () -> bool
+
+      # `n:$($labels)` is available and wanted.
+      def dynamic_labels?: () -> bool
+
+      # The `CYPHER 5 ` / `CYPHER 25 ` statement prefix of the dialect, if any.
+      def prefix: () -> String?
+
+      # One level of indentation: a tab, or `indent_size` spaces.
+      def indent_unit: () -> String
+
+      # Fluent builder; each setter returns the builder.
+      class Builder
+        # Any value one of the setters accepts, keyed by the `Configuration.new` keyword it stands for.
+        type option_value = bool | Integer | Symbol | generated_names_option
+
+        @options: Hash[Symbol, option_value]
+
+        def initialize: () -> void
+
+        def always_escape_names: (bool value) -> self
+
+        def with_dialect: (Dialect::name dialect) -> self
+
+        def with_pretty_print: (bool value) -> self
+
+        def with_indent_size: (Integer size) -> self
+
+        def with_indent_style: (indent_style style) -> self
+
+        def disable_dynamic_labels: (?bool value) -> self
+
+        # `true`, `false` or a list of {Configuration::GENERATED_NAMES} flags.
+        def with_generated_names: (generated_names_option value) -> self
+
+        def build: () -> Configuration
+
+        private
+
+        def option: (Symbol name, option_value value) -> self
+      end
+
+      private
+
+      # untyped: `case value when true … when false, nil … else value.to_a` — Steep does not narrow
+      # `bool` by the `true` / `false` branches, so the `Enumerable` branch would not type check.
+      def generated_name_flags: (untyped value) -> Set[generated_name]
+    end
+  end
+end

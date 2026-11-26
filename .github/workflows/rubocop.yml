@@ -1,0 +1,25 @@
+name: RuboCop
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rubocop:
+    name: rubocop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      # --format github surfaces offenses as inline PR annotations.
+      - name: Run RuboCop
+        run: bundle exec rubocop --format github

@@ -1,0 +1,77 @@
+module CypherDSL
+  # `SEARCH movie IN (VECTOR INDEX moviePlots FOR $vector WHERE … LIMIT 4) SCORE AS score`,
+  # attached to a MATCH clause. Built with
+  # `Cypher.search(:movie).in('moviePlots').for_vector(vector).where(…).limit(4).score(:s).build`.
+  class Search
+    # The expressions accepted as the query vector (see `SUPPORTED_VECTORS`).
+    type vector = VectorLiteral | ListExpression | Parameter | Property
+
+    @name: SymbolicName
+
+    @index_name: String
+
+    @vector: vector
+
+    @predicates: Array[Comparison]
+
+    @top_k: Integer?
+
+    @score_name: SymbolicName?
+
+    SUPPORTED_VECTORS: Array[Class]
+
+    attr_reader name: SymbolicName
+
+    attr_reader index_name: String
+
+    attr_reader vector: vector
+
+    attr_reader predicates: Array[Comparison]
+
+    attr_reader top_k: Integer?
+
+    attr_reader score_name: SymbolicName?
+
+    def initialize: (name: SymbolicName, index_name: String, vector: vector, predicates: Array[Comparison], top_k: Integer?, score_name: SymbolicName?) -> void
+
+    # The search rendered on its own with the default renderer.
+    def cypher: () -> String
+
+    alias to_s cypher
+
+    # The ongoing definition; every step returns a new builder.
+    class Builder
+      @name: SymbolicName
+
+      @index_name: String?
+
+      @vector: vector?
+
+      @predicates: Array[Comparison]
+
+      @top_k: Integer?
+
+      @score_name: SymbolicName?
+
+      def initialize: (SymbolicName? name, ?index_name: String?, ?vector: vector?, ?predicates: Array[Comparison], ?top_k: Integer?, ?score_name: SymbolicName?) -> void
+
+      def in: ((String | Symbol)? index_name) -> Builder
+
+      def for_vector: (vector? vector) -> Builder
+
+      # Only comparisons; several are combined with AND.
+      def where: (*Comparison | Array[Comparison] predicates) -> Builder
+
+      def limit: (Integer top_k) -> Builder
+
+      def score: (name_like name) -> Builder
+
+      def build: () -> Search
+
+      private
+
+      # untyped: a `**changes` splat merged into the keyword arguments of `Builder.new`.
+      def with: (**untyped changes) -> Builder
+    end
+  end
+end

@@ -26,7 +26,10 @@ module CypherDSL
 
       def in(list) = Ongoing.new(@predicate, @variable, Expression.coerce(list))
 
+      # `where` needs an `in` first; Steep cannot see that `@list` is set by then.
+      # steep:ignore:start
       def where(condition) = ListPredicate.new(@predicate, @variable, @list, Condition.coerce(condition))
+      # steep:ignore:end
     end
   end
 end

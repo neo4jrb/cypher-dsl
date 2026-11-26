@@ -1,0 +1,13 @@
+module CypherDSL
+  module Clauses
+    # `[DETACH] DELETE expression, …`.
+    class Delete < Data
+      attr_reader detach: bool
+      attr_reader expressions: Array[Expression]
+
+      def self.new: (detach: bool, expressions: Array[Expression]) -> instance
+
+      def with: (?detach: bool, ?expressions: Array[Expression]) -> instance
+    end
+  end
+end

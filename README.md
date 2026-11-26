@@ -135,13 +135,28 @@ The flags are `entity_names`, `parameter_names`, `all_aliases`, `internal_aliase
 
 ## Installation
 
-Pre-releases are not picked up by a bare requirement, so name the version:
-
 ```ruby
-gem 'cypher-dsl', '0.1.0'
+gem 'cypher-dsl', '~> 0.1.0'
 ```
 
 Requires Ruby 3.4 or newer.
+
+## Type signatures
+
+The gem ships RBS signatures for its public API in `sig/`. With
+[Steep](https://github.com/soutaro/steep) or `rbs collection` they are picked
+up automatically; the library itself is type checked against them in CI.
+
+## Development
+
+```sh
+bundle install
+bundle exec rake            # specs + all static checks
+bundle exec rake static     # rubocop, reek, rbs validate, steep check
+COVERAGE=1 bundle exec rspec && bundle exec rake coverage:enforce
+```
+
+See `CONTRIBUTING.md` for what each check gates.
 
 ## Licence
 

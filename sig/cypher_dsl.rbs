@@ -1,0 +1,29 @@
+# Shared type aliases for the signatures in sig/. The entry point is
+# {CypherDSL::Cypher}; everything else is reached from there.
+module CypherDSL
+  # A plain Ruby value that `Literal.of` renders inline.
+  type literal_value = String | Numeric | bool | nil | Date | Time
+
+  # Anything accepted where an expression is expected: expressions pass through,
+  # plain values become literals, hashes map expressions and arrays lists
+  # (see `Expression.coerce`).
+  type expression_like = Expression | literal_value | Array[expression_like] | Hash[String | Symbol, expression_like]
+
+  # A variable name; strings and symbols are interchangeable (see `SymbolicName.of`).
+  type name_like = SymbolicName | String | Symbol
+
+  # Anything accepted where a condition is expected (see `Condition.coerce`).
+  type condition_like = Condition | Relationship | RelationshipChain | FunctionInvocation | RawExpression
+
+  # What MATCH, CREATE and MERGE accept as a pattern.
+  type pattern_element = Node | Relationship | RelationshipChain | NamedPath | QuantifiedPathPattern | RawExpression
+
+  module Clauses
+    # Any clause object a `Statement` holds (see `Clauses.clause?`).
+    type clause = Call | CallSubquery | Create | Delete | Finish | Foreach | LoadCsv | Match | Merge | Order
+                | Raw | RawReturn | Remove | Return | Set | Unwind | Use | With
+
+    # The clauses allowed inside FOREACH (see `Clauses.updating?`).
+    type updating_clause = Set | Remove | Create | Merge | Delete | Foreach
+  end
+end

@@ -129,6 +129,7 @@ module CypherDSL
 
         # Renders with the current scope, discarding names introduced inside.
         def render_in_own_scope
+          # @type var outer_scope: Set[String]
           outer_scope = @visited_names.dup
           @names.enter_scope(:all)
           yield
@@ -154,6 +155,7 @@ module CypherDSL
         end
 
         def with_names_in_scope(names)
+          # @type var added: Array[String]
           added = names.reject { |name| @visited_names.include?(name) }
           @visited_names.merge(added)
           yield

@@ -1,0 +1,16 @@
+module CypherDSL
+  module Clauses
+    # `RETURN [DISTINCT] items [ORDER BY …] [SKIP …] [LIMIT …]`.
+    class Return < Data
+      attr_reader distinct: bool
+      attr_reader items: Array[Expression]
+      attr_reader order: Order?
+      attr_reader skip: Expression?
+      attr_reader limit: Expression?
+
+      def self.new: (distinct: bool, items: Array[Expression], order: Order?, skip: Expression?, limit: Expression?) -> instance
+
+      def with: (?distinct: bool, ?items: Array[Expression], ?order: Order?, ?skip: Expression?, ?limit: Expression?) -> instance
+    end
+  end
+end

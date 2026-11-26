@@ -26,7 +26,7 @@ module CypherDSL
     # `parts` is a string or a list of strings and expressions.
     def initialize(parts)
       @parts = Array(parts).filter_map do |part|
-        next part unless part.is_a?(String)
+        next part unless part.is_a?(String) # steep:ignore BreakTypeMismatch
 
         part.gsub('\$E', EXPRESSION_PLACEHOLDER) unless part.empty?
       end.freeze
@@ -42,7 +42,8 @@ module CypherDSL
         @format = format
         @parameters = mixed_arguments.grep(Parameter).reject(&:anonymous?).to_h { |p| [p.name, p] }
         @positional = mixed_arguments.dup
-        @matches = format.enum_for(:scan, PLACEHOLDER).map { Regexp.last_match }
+        # `last_match` is never `nil` right after a `scan` match, which Steep cannot see.
+        @matches = format.enum_for(:scan, PLACEHOLDER).map { Regexp.last_match } # steep:ignore BlockBodyTypeMismatch
         # Placeholders naming an actual parameter take it with precedence over the positional ones.
         @matches.each { |match| @positional.delete(@parameters[match[3]]) if @parameters.key?(match[3]) }
         @parts = []

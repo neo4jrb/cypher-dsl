@@ -1,0 +1,15 @@
+module CypherDSL
+  module Clauses
+    # An operation of SET (and of ON CREATE / ON MATCH): an assignment, a label operation or a raw fragment.
+    type operation = Operation | LabelOperation | RawExpression
+
+    # `SET n.prop = value, …`.
+    class Set < Data
+      attr_reader operations: Array[operation]
+
+      def self.new: (operations: Array[operation]) -> instance
+
+      def with: (?operations: Array[operation]) -> instance
+    end
+  end
+end

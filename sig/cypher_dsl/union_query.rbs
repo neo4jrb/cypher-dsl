@@ -1,0 +1,21 @@
+module CypherDSL
+  # Several statements combined with UNION or UNION ALL.
+  class UnionQuery < Statement
+    @statements: Array[Statement]
+
+    @all: bool
+
+    attr_reader statements: Array[Statement]
+
+    attr_reader all: bool
+
+    # Appends to an existing union when the first statement already is one of the same kind.
+    def self.create: (Array[Statement | Array[Statement]] statements, all: bool) -> UnionQuery
+
+    def initialize: (Array[Statement] statements, all: bool) -> void
+
+    def result_statement?: () -> bool
+
+    def multi_part_query?: () -> bool
+  end
+end

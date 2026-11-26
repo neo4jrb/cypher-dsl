@@ -1,0 +1,16 @@
+module CypherDSL
+  # `COLLECT { [WITH imports] statement }`: the statement must end with a RETURN of one column.
+  class CollectExpression
+    include Expression
+
+    MESSAGE: String
+
+    attr_reader statement: Statement
+
+    attr_reader imports: Array[Expression]
+
+    def initialize: (Statement statement, ?Array[Expression] imports) -> void
+
+    def self.single_column?: (Statement statement) -> bool
+  end
+end

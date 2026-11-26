@@ -17,8 +17,9 @@ module CypherDSL
 
     def where(condition) = with(where_condition: Condition.coerce(condition))
 
-    def and(condition) = with(where_condition: where_condition.and(condition))
-    def or(condition) = with(where_condition: where_condition.or(condition))
+    # `and` and `or` need a `where` first; Steep cannot see that `where_condition` is set by then.
+    def and(condition) = with(where_condition: where_condition.and(condition)) # steep:ignore NoMethod
+    def or(condition) = with(where_condition: where_condition.or(condition)) # steep:ignore NoMethod
 
     def returning(*expressions) = with(projection: expressions.flatten.map { |e| Expression.coerce(e) })
 

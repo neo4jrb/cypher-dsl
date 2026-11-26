@@ -1,0 +1,283 @@
+module CypherDSL
+  # The main entry point of the DSL. Mirrors the static factory methods of the
+  # Java `org.neo4j.cypherdsl.core.Cypher` class in snake_case.
+  #
+  # All methods are `module_function`s, called as `Cypher.node(…)`. The function
+  # catalogue of {Functions} is reached the same way (`Cypher.to_upper(…)`).
+  module Cypher
+    extend Functions
+
+    # Only for the type checker: Steep checks `module_function` bodies as
+    # instance methods, and some of them (`exists`, `range`, `collect`, `size`,
+    # `use`) call `function` / `graph_by_name` from {Functions}, which Ruby
+    # reaches through the `extend` above. At runtime Functions is not included.
+    include Functions
+
+    # A node label: a string, a symbol or a label expression (see {Labels}).
+    type label = String | Symbol | Labels
+
+    # Labels as given to `node` and friends; arrays are flattened.
+    type label_argument = label | Array[label]
+
+    # Node properties given among the labels of `node`: a map expression or a hash.
+    type properties = MapExpression | Hash[String | Symbol, expression_like]
+
+    # A property name: a string or symbol, or an expression for a dynamic lookup (`n[$prop]`).
+    type property_name = String | Symbol | Expression
+
+    # An entry of a map projection: a key (string or symbol) followed by its value, a
+    # bare key for `.key`, or a property, aliased expression, name, node or `*` on its own.
+    type projection_entry = String | Symbol | expression_like
+
+    # The direction of a sort item.
+    type sort_direction = :asc | :desc
+
+    # --- pattern elements ------------------------------------------------
+
+    # A node with one primary label and optional additional labels (or lists of
+    # them); a map among the arguments (`Cypher.node('Test', Cypher.map_of(…))`)
+    # sets its properties.
+    def self?.node: (label primary_label, *(label_argument | properties) additional_labels) -> Node
+
+    # A node without labels, optionally named.
+    # `Cypher.search(:movie).in('index').for_vector(v).limit(4).build`, see {Search}.
+    def self?.search: (name_like? name) -> Search::Builder
+
+    # `vector([1, 2, 3], 3, INTEGER NOT NULL)`, see {VectorLiteral}. The type is one of
+    # `:integer8`, `:integer16`, `:integer32`, `:integer`, `:float32`, `:float`; by
+    # default integers give `:integer`, anything else `:float`.
+    def self?.vector: (Array[Integer | Float] elements, ?Symbol? `type`) -> VectorLiteral
+
+    # Label expressions: `Cypher.node(Cypher.exactly_label('A').or('B'))`, `Cypher.node(Cypher.all_labels($labels))`.
+    def self?.exactly_label: (String | Symbol label) -> Labels
+
+    def self?.all_labels: (expression_like expression) -> Labels
+
+    def self?.any_label: (expression_like expression) -> Labels
+
+    def self?.any_node: (?name_like? name) -> Node
+
+    # --- names, properties, parameters -----------------------------------
+
+    def self?.name: (name_like value) -> SymbolicName
+
+    # `Cypher.property(:n, :name)` → `n.name`; the container may also be an expression,
+    # and a name may be an expression for a dynamic lookup (`n[$prop]`).
+    def self?.property: (name_like | Expression container, *(property_name | Array[property_name]) names) -> Property
+
+    # `$name`, optionally with its value; see {Parameter}.
+    # untyped: the value is whatever the driver accepts (scalars, lists, maps, temporal types).
+    def self?.parameter: (String | Symbol name, ?untyped value) -> Parameter
+
+    # A parameter named by the renderer (`$pcdsl01`, …), carrying its value.
+    # untyped: the value is whatever the driver accepts (scalars, lists, maps, temporal types).
+    def self?.anon_parameter: (untyped value) -> Parameter
+
+    # --- literals --------------------------------------------------------
+
+    # Wraps a Ruby value as a literal; expressions pass through unchanged, hashes
+    # become map expressions and arrays list expressions.
+    def self?.literal_of: (expression_like value) -> Expression
+
+    def self?.literal_true: () -> Literal
+
+    def self?.literal_false: () -> Literal
+
+    def self?.literal_null: () -> Literal
+
+    # `map_of(key, value, key, value, …)` with string or symbol keys, `map_of(hash)`,
+    # or an existing map expression.
+    def self?.map_of: (*(String | Symbol | expression_like) keys_and_values) -> MapExpression
+
+    def self?.list_of: (*expression_like expressions) -> ListExpression
+
+    def self?.asterisk: () -> Asterisk
+
+    # --- conditions ------------------------------------------------------
+
+    def self?.is_true: () -> ConstantCondition
+
+    def self?.is_false: () -> ConstantCondition
+
+    def self?.no_condition: () -> NoCondition
+
+    def self?.not: (condition_like condition_or_pattern) -> Condition
+
+    def self?.includes_all: (expression_like list_expression, expression_like list) -> Condition
+
+    def self?.includes_any: (expression_like list_expression, expression_like list) -> Condition
+
+    # `[pattern WHERE … | …]`; continue with `where` and `returning`.
+    def self?.list_based_on: (Relationship | RelationshipChain | NamedPath pattern) -> PatternComprehension
+
+    # `[variable IN list WHERE … | …]`; continue with `in`, `where` and `returning`.
+    def self?.list_with: (name_like variable) -> ListComprehension
+
+    # `Cypher.path(:p).defined_by(pattern)` for `MATCH p = pattern`; `.get` for the bare name.
+    def self?.path: (name_like name) -> NamedPath::Ongoing
+
+    # Path selectors, `Cypher.any_shortest.named(:p).defined_by(pattern)` → `p = ANY pattern`.
+    def self?.any_shortest: () -> NamedPath::Selector
+
+    def self?.all_shortest: () -> NamedPath::Selector
+
+    def self?.shortest_k: (Integer count) -> NamedPath::Selector
+
+    def self?.shortest_k_groups: (Integer count) -> NamedPath::Selector
+
+    # `EXISTS { pattern }` / `EXISTS { pattern, pattern }` / `EXISTS { [WITH imports] statement }`.
+    # A property gives the condition `n.prop IS NOT NULL` (`exists(n.prop)` on Neo4j 4), any other
+    # plain expression the `exists(expr)` function.
+    def self?.exists: (Expression | ExistsCondition::body body, *expression_like imports) -> (Condition | FunctionInvocation)
+
+    # The classes that stand for a pattern rather than an expression in `exists`, `size` and `count`.
+    PATTERN_TYPES: Array[Class]
+
+    def self?.pattern?: (untyped value) -> bool
+
+    # The condition `name:Label`, for a name that may stand for a node or a relationship.
+    def self?.has_labels_or_type: (name_like name, *label_argument labels) -> HasLabelCondition
+
+    # List predicates: `Cypher.all(:x).in(list).where(condition)`.
+    def self?.all: (name_like variable) -> ListPredicate::Ongoing
+
+    def self?.any: (name_like variable) -> ListPredicate::Ongoing
+
+    def self?.none: (name_like variable) -> ListPredicate::Ongoing
+
+    def self?.single: (name_like variable) -> ListPredicate::Ongoing
+
+    def self?.sub_list_until: (expression_like list, ListOperator::index end_index) -> ListOperator
+
+    def self?.sub_list_from: (expression_like list, ListOperator::index start_index) -> ListOperator
+
+    def self?.sub_list: (expression_like list, ?ListOperator::index? start_index, ?ListOperator::index? end_index) -> ListOperator
+
+    def self?.range: (expression_like start_value, expression_like end_value, ?expression_like step) -> FunctionInvocation
+
+    # --- operations ------------------------------------------------------
+
+    # `SET target = value`; the target is a property, a node, a relationship or a name.
+    def self?.set: (Expression target, expression_like value) -> Operation
+
+    def self?.set_label: (Node node, *label labels) -> LabelOperation
+
+    def self?.remove_label: (Node node, *label labels) -> LabelOperation
+
+    # `SET target += expression`.
+    def self?.mutate: (Expression target, expression_like expression) -> Operation
+
+    def self?.minus: (expression_like expression) -> UnaryOperation
+
+    def self?.plus: (expression_like expression) -> UnaryOperation
+
+    def self?.value_at: (expression_like list, ListOperator::index index) -> ListOperator
+
+    def self?.sublist: (expression_like list, ?ListOperator::index? start_index, ?ListOperator::index? end_index) -> ListOperator
+
+    # `CASE … END`; `case_expression(subject)` for the simple form, no argument for the generic one.
+    def self?.case_expression: (?(Expression | String | Numeric)? subject) -> CaseExpression
+
+    # --- sorting and functions --------------------------------------------
+    # Plain functions live in {Functions}; these overloads also accept patterns and statements.
+
+    # `collect(expression)`, or `COLLECT { statement }` when given a statement.
+    def self?.collect: (expression_like | Statement expression_or_statement) -> (FunctionInvocation | CollectExpression)
+
+    # A map projection on a name: `Cypher.create_projection(:n, 'title')` → `n{.title}`.
+    def self?.create_projection: (name_like name, *(projection_entry | Array[projection_entry]) entries) -> MapProjection
+
+    # A sort item, optionally with its direction (`:asc` / `:desc`).
+    def self?.sort: (expression_like expression, ?sort_direction? direction) -> SortItem
+
+    # A string as a Cypher string literal, `'…'` with quotes and backslashes escaped.
+    def self?.quote: (String string) -> String
+
+    # A short textual form of an expression: the name of a named element, alias or
+    # symbolic name, `container.name` for a property, the rendered Cypher otherwise.
+    # `nil` for a generated name the renderer has not resolved yet.
+    def self?.format: (Expression expression) -> String?
+
+    # `size(list)` or `size(pattern)`.
+    def self?.size: (expression_like | pattern_element expression_or_pattern) -> FunctionInvocation
+
+    # `count(expression)`, or `COUNT { [WITH imports] pattern }` / `COUNT { … statement }`
+    # for patterns and statements.
+    def self?.count: (expression_like | pattern_element | Statement expression_or_pattern, *expression_like imports) -> (FunctionInvocation | CountExpression)
+
+    # `Cypher.call('db.labels')` / `Cypher.call('db', 'labels')`: a procedure call (see {StandaloneCall});
+    # `Cypher.call(statement, imports…)`: a `CALL { subquery }`. The first argument decides which.
+    def self?.call: (*(Statement | String | Symbol | expression_like) arguments) -> (StatementBuilder | StandaloneCall)
+
+    # `Cypher.use('graph', statement)`: the statement prefixed with `USE graph`. An
+    # expression as the target (a name, literal or parameter) is wrapped in
+    # `graph.byName(…)` unless it already is a function call.
+    def self?.use: (Expression | String | Symbol graph, Statement statement) -> Statement
+
+    # Keyed by `Statement#prefix`, for the error message of `use`.
+    DECORATED: Hash[String, String]
+
+    # `Cypher.load_csv('file:///x.csv').as(:line)`.
+    def self?.load_csv: (String | Symbol uri, ?bool positional_headers, ?with_headers: bool) -> StatementBuilder::OngoingLoadCsv
+
+    # `Cypher.using_periodic_commit(500).load_csv(uri).as(:line)`.
+    def self?.using_periodic_commit: (?Integer? rate) -> UsingPeriodicCommit
+
+    # Imports for an EXISTS / COLLECT subquery: `Cypher.subquery_with(x).collect(statement)`.
+    def self?.subquery_with: (*expression_like imports) -> SubqueryWith
+
+    # `CALL () { raw cypher }`; continues as a statement builder.
+    def self?.call_raw_cypher: (String cypher) -> StatementBuilder
+
+    # Verbatim Cypher, the escape hatch: the format string first, then the expressions
+    # its `$E` placeholders take in order (`\$E` is a literal `$E`); named placeholders
+    # take a parameter of that name. See {RawExpression.create}.
+    def self?.raw: (*(String | Expression) format_and_arguments) -> RawExpression
+
+    # Static comparison forms, `Cypher.gt(a, b)` etc.
+    def self?.eq: (expression_like left, expression_like right) -> Condition
+
+    def self?.ne: (expression_like left, expression_like right) -> Condition
+
+    def self?.gt: (expression_like left, expression_like right) -> Condition
+
+    def self?.gte: (expression_like left, expression_like right) -> Condition
+
+    def self?.lt: (expression_like left, expression_like right) -> Condition
+
+    def self?.lte: (expression_like left, expression_like right) -> Condition
+
+    # --- statement builders -----------------------------------------------
+
+    # `match(pattern, …)` or `match(optional, pattern, …)` with a leading flag, as in Java.
+    def self?.match: (*(bool | StatementBuilder::pattern_argument) pattern_elements) -> StatementBuilder
+
+    def self?.optional_match: (*StatementBuilder::pattern_argument pattern_elements) -> StatementBuilder
+
+    def self?.create: (*StatementBuilder::pattern_argument pattern_elements) -> StatementBuilder
+
+    def self?.merge: (*StatementBuilder::pattern_argument pattern_elements) -> StatementBuilder
+
+    def self?.with: (*StatementBuilder::projection_item expressions) -> StatementBuilder
+
+    def self?.unwind: (*expression_like expressions) -> StatementBuilder::OngoingUnwind
+
+    def self?.returning: (*StatementBuilder::projection_item expressions) -> StatementBuilder
+
+    def self?.returning_distinct: (*StatementBuilder::projection_item expressions) -> StatementBuilder
+
+    def self?.returning_raw: (*StatementBuilder::projection_item expressions) -> StatementBuilder
+
+    # A UNION / UNION ALL of at least two statements (arrays are flattened); their
+    # parameters are merged and must not clash (see {ConflictingParametersException}).
+    def self?.union: (*(Statement | Array[Statement]) statements) -> UnionQuery
+
+    def self?.union_all: (*(Statement | Array[Statement]) statements) -> UnionQuery
+
+    private
+
+    def self?.blank_label?: (String | Labels label) -> bool
+
+    def self?.format_name: (String | Expression name) -> String?
+  end
+end

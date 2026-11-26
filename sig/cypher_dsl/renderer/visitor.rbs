@@ -1,0 +1,180 @@
+module CypherDSL
+  class Renderer
+    # Walks a statement and produces Cypher text. One instance per render call:
+    # it remembers which named nodes have already been rendered with their
+    # content, so later occurrences render as `(name)` only.
+    class Visitor
+      # Anything {Visitor::Expressions#render_expression} renders: expressions proper plus the
+      # sort items and label operations that appear in ORDER BY, SET and REMOVE.
+      type renderable = Expression | SortItem | LabelOperation
+
+      # The body of a `CALL { }` subquery: a statement (possibly a union) or raw Cypher text.
+      type subquery_body = Statement | RawExpression
+
+      # The helpers and state the rendering mixins ({Patterns}, {Expressions}, {Conditions},
+      # {LabelRendering}) share with the visitor and with each other. Internal: the methods are
+      # private in Ruby, declared public here so that the mixins' self-type constraint resolves.
+      interface _VisitorInternals
+        def pretty?: () -> bool
+        def break_line: (?Integer level) -> String
+        def nested: [T] () { () -> T } -> T
+        def block: (String opening, String closing, ?inline_padding: String) { () -> String } -> String
+        def resolve_name: (SymbolicName symbolic_name, ?in_entity: bool) -> String
+        def render_subquery: (Statement statement, ?Array[Expression] imports) -> String
+        def render_sort_item: (SortItem item) -> String
+        def render_aliased_reference: (AliasedExpression item) -> String
+        def render_projection_item: (Expression item) -> String
+        def render_pattern_elements: (Array[pattern_element] elements) -> String
+        def render_expression: (renderable expression) -> String
+        def render_raw: (RawExpression raw) -> String
+        def render_literal: (literal_value value) -> String
+        def render_in_own_scope: [T] () { () -> T } -> T
+        def escape_schema_name: (String name) -> String
+        def render_pattern_element: (pattern_element element) -> String
+        def render_pattern_expression: (pattern_element pattern) -> String
+        def render_label: (String | Labels label) -> String
+        def render_comparison: (untyped comparison) -> String
+        def render_compound_condition: (CompoundCondition condition) -> String
+        def render_property_exists: (PropertyExistsCondition condition, ?negated: bool) -> String
+      end
+
+      include Patterns
+      include Expressions
+      include Conditions
+      include LabelRendering
+
+      @configuration: Configuration
+      # The names rendered in full in the current scope; later occurrences render as `(name)`.
+      @visited_names: Set[String]
+      # Alias name => the expression (an `Expression`) it was defined for, in the current scope.
+      # untyped: the values are compared with `==`, which the `Expression` module type does not
+      # expose to Steep (it would once `Expression` declared `BasicObject` among its self types).
+      @defined_aliases: Hash[String, untyped]
+      @names: NameResolver
+      # Parameter name as given => name as rendered, for parameters the resolver rewrote.
+      @renamed_parameters: Hash[String, String]
+      # untyped: parameter values are arbitrary host data; see {StatementCatalog.from_uses}.
+      @parameter_uses: Hash[String, Array[untyped]]
+      # Nesting depth of {#render}; 1 for the outermost statement.
+      @depth: Integer
+      @in_last_return: bool
+      @anonymous_parameters: Array[Parameter]
+      # Indentation level when pretty printing.
+      @level: Integer
+      # True while rendering the clause that opens the statement's scope.
+      @first_clause: bool
+      # True while rendering a pattern used as a condition; unset until the first one.
+      @in_pattern_expression: bool?
+
+      def initialize: (Configuration configuration) -> void
+
+      # The parameters seen while rendering `statement`; see {Renderer#catalog}.
+      def catalog: (?Statement? statement) -> StatementCatalog
+
+      # A part of a statement on its own; see {Renderer#render_fragment} for what is accepted.
+      # untyped: dispatches on the run-time type; the else branch tells clauses from expressions
+      # with `Clauses.clause?`, which Steep cannot narrow by.
+      def render_fragment: (untyped fragment) -> String
+
+      def render: (Statement statement) -> String
+
+      # Each statement of a union starts from the scope the union was entered with.
+      def render_union: (UnionQuery union) -> String
+
+      # The rendered name of a symbolic name; see {NameResolver}.
+      def resolve_name: (SymbolicName symbolic_name, ?in_entity: bool) -> String
+
+      # --- shared with the mixins (private in Ruby, see _VisitorInternals) ---
+
+      def pretty?: () -> bool
+
+      # A clause or entry separator: a newline plus indentation when pretty printing, a space otherwise.
+      def break_line: (?Integer level) -> String
+
+      # Renders the block one level deeper, e.g. the body of a subquery.
+      def nested: [T] () { () -> T } -> T
+
+      # `opening` + body on its own indented lines + `closing`, or inline when not pretty printing.
+      def block: (String opening, String closing, ?inline_padding: String) { () -> String } -> String
+
+      # A subquery statement rendered within the current scope (EXISTS / COLLECT).
+      def render_subquery: (Statement statement, ?Array[Expression] imports) -> String
+
+      def render_sort_item: (SortItem item) -> String
+
+      def render_aliased_reference: (AliasedExpression item) -> String
+
+      # In RETURN/WITH an aliased expression is defined once (`expr AS alias`);
+      # afterwards, and anywhere else, it is a reference and renders as the alias.
+      def render_projection_item: (Expression item) -> String
+
+      def render_pattern_elements: (Array[pattern_element] elements) -> String
+
+      private
+
+      def render_clause: (Clauses::clause clause) -> String
+
+      def render_unwind: (Clauses::Unwind clause) -> String
+
+      def render_load_csv: (Clauses::LoadCsv clause) -> String
+
+      def render_call: (Clauses::Call clause) -> String
+
+      # `CALL (imports) { body }` on Neo4j 5.23+, `CALL { WITH imports body }` before.
+      def render_call_subquery: (Clauses::CallSubquery clause) -> String
+
+      # What a subquery hands back to the outer scope: the items of its final RETURN.
+      def exports_of: (subquery_body body) -> NameResolver::scope_items
+
+      # An aliased import (`nodes AS x`) imports the name and renames it with a
+      # leading `WITH nodes AS x` inside the body.
+      def subquery_body_and_imports: (Clauses::CallSubquery clause) -> [subquery_body, Array[Expression]]
+
+      # untyped: the body is `subquery_body` at the call site; aliased imports presuppose a
+      # statement body (a raw body would raise at run time), which the signature cannot express.
+      def renamed_imports: (untyped body, Array[Expression] imports) -> [Statement, Array[Expression]]
+
+      def importing_with?: (Clauses::clause? clause) -> bool
+
+      # Imported names form the subquery's scope; `*` imports the whole current scope.
+      def scope_of: (Array[Expression] imports) -> Set[String]
+
+      # A CALL subquery body: only the imports are visible inside, the final RETURN is exported.
+      def render_in_scope: (subquery_body body, Set[String] scope, Array[Expression] imports) -> String
+
+      def render_foreach: (Clauses::Foreach clause) -> String
+
+      def render_match: (Clauses::Match clause) -> String
+
+      # `SEARCH name IN (VECTOR INDEX index FOR vector [WHERE …] LIMIT k) [SCORE AS score]`.
+      def render_search: (Search search) -> String
+
+      # untyped: a `Search`; its `Comparison` predicates are folded with `Condition#and` into a
+      # `Condition`, which `Array#inject` without an initial value cannot express.
+      def search_options: (untyped search) -> Array[String]
+
+      # untyped: a `Hint`; `container` and `schema_name` are nil only for `:join` hints, which the
+      # `type` tag cannot narrow.
+      def render_hint: (untyped hint) -> String
+
+      def render_merge: (Clauses::Merge clause) -> String
+
+      def render_operations: (Array[renderable] operations) -> String
+
+      def render_delete: (Clauses::Delete clause) -> String
+
+      # WITH ends a query part: only the names it projects stay in scope.
+      def render_with: (Clauses::With clause) -> String
+
+      def exported_names: (Array[Expression] items) -> Set[String]
+
+      def render_projection: (String keyword, Clauses::Return | Clauses::With clause) -> String
+
+      # The same alias may be given to another expression later (`WITH a AS x RETURN count(*) AS x`).
+      def alias_defined?: (AliasedExpression item, String alias_name) -> bool
+
+      # WHERE goes on its own line when pretty printing; nothing for no condition.
+      def render_where: (Condition? condition) -> String?
+    end
+  end
+end

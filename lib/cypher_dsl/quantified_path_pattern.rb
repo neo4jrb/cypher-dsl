@@ -9,6 +9,7 @@ module CypherDSL
   class QuantifiedPathPattern
     # `{lower,upper}`, `+` or `*`.
     Quantifier = Data.define(:lower, :upper, :symbol) do
+      # @implements QuantifiedPathPattern::Quantifier
       def to_cypher = symbol || "{#{lower || 0},#{upper}}"
     end
 

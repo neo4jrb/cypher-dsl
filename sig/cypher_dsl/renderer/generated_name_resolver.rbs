@@ -1,0 +1,47 @@
+module CypherDSL
+  class Renderer
+    # Rewrites names to `v0`, `v1`, … per scope and parameters to `p0`, `p1`, …,
+    # controlled by the flags of `Configuration::GENERATED_NAMES` (the Java
+    # `GeneratedNames` enum).
+    class GeneratedNameResolver < NameResolver
+      # What a generated name is looked up by: the symbolic name of a node, relationship or alias,
+      # any other identifiable expression, or `[:parameter, name]` for a parameter.
+      type lookup_key = Expression | [Symbol, String]
+
+      @flags: Set[Configuration::generated_name]
+      @parameter_count: Integer
+      # One entry per open scope, innermost last.
+      @counters: Array[Integer]
+      @lookups: Array[Hash[lookup_key, String]]
+      @used: Array[Set[String]]
+
+      def initialize: (Enumerable[Configuration::generated_name] flags) -> void
+
+      # `imports` are the identifiables visible inside the new scope, or `:all`.
+      # untyped: a `scope_items`; Steep drops the `imports == :all` narrowing on the receiver of a
+      # call with a block (`imports.to_h { … }`).
+      def enter_scope: (untyped imports) -> void
+
+      # `exports` are the identifiables the scope returns to its outer scope, or `:all`.
+      # untyped: a `scope_items`; see {#enter_scope} (`exports.each { … }`).
+      def leave_scope: (untyped exports) -> void
+
+      def resolve: (SymbolicName symbolic_name, ?in_entity: bool) -> String
+
+      def resolve_alias: (AliasedExpression aliased, ?define: bool, ?in_last_return: bool) -> String
+
+      # untyped: see {NameResolver#resolve_parameter}.
+      def resolve_parameter: (untyped parameter) -> String
+
+      private
+
+      def flag?: (Configuration::generated_name flag) -> bool
+
+      def key_of: (Expression object) -> lookup_key
+
+      def exported_name: (Expression export, Hash[lookup_key, String] inner) -> String
+
+      def new_name: () -> String
+    end
+  end
+end

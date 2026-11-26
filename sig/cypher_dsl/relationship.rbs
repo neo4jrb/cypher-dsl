@@ -1,0 +1,129 @@
+module CypherDSL
+  # A relationship pattern between two nodes, `(a)-[r:TYPE*1..3 {props} WHERE …]->{1,3}(b)`.
+  # Used as an expression it stands for its symbolic name.
+  class Relationship
+    # The direction of a relationship pattern: left to right, right to left or undirected.
+    type direction = :ltr | :rtl | :uni
+
+    @left: Node
+
+    @direction: direction
+
+    @right: Node
+
+    @details: Details
+
+    @generated_name: SymbolicName?
+
+    include Expression
+
+    # Everything between the brackets plus the direction and a relationship quantifier.
+    class Details < Data
+      attr_reader types: Array[String]
+      attr_reader symbolic_name: SymbolicName?
+      attr_reader properties: MapExpression?
+      attr_reader min: Integer?
+      attr_reader max: Integer?
+      attr_reader unbounded: bool
+      attr_reader where: Condition?
+      attr_reader quantifier: QuantifiedPathPattern::Quantifier?
+
+      def self.new: (types: Array[String], symbolic_name: SymbolicName?, properties: MapExpression?, min: Integer?, max: Integer?, unbounded: bool, where: Condition?, quantifier: QuantifiedPathPattern::Quantifier?) -> instance
+
+      def with: (?types: Array[String], ?symbolic_name: SymbolicName?, ?properties: MapExpression?, ?min: Integer?, ?max: Integer?, ?unbounded: bool, ?where: Condition?, ?quantifier: QuantifiedPathPattern::Quantifier?) -> instance
+
+      def empty?: () -> bool
+
+      def length?: () -> bool
+    end
+
+    # The direction of a relationship pattern, for {Node#relationship_with}.
+    module Direction
+      LTR: direction
+
+      RTL: direction
+
+      UNI: direction
+
+      ALL: Array[direction]
+    end
+
+    attr_reader left: Node
+
+    attr_reader right: Node
+
+    attr_reader direction: direction
+
+    attr_reader details: Details
+
+    def self.create: (Node left, direction direction, Node right, Array[String | Symbol] types) -> Relationship
+
+    def initialize: (Node left, direction direction, Node right, Details details) -> void
+
+    # The explicit name, or the generated one once {#required_symbolic_name} was called.
+    %a{pure}
+    def symbolic_name: () -> SymbolicName?
+
+    def named?: () -> bool
+
+    # The name of this relationship, generating one if it has none.
+    def required_symbolic_name: () -> SymbolicName
+
+    alias as_expression required_symbolic_name
+
+    def named: (name_like name) -> Relationship
+
+    # A hash, a `MapExpression` or alternating keys and values, as `MapExpression.of`.
+    def with_properties: (*MapExpression | Hash[String | Symbol, expression_like] | Symbol | expression_like keys_and_values) -> Relationship
+
+    alias properties with_properties
+
+    def min: (Integer? minimum) -> Relationship
+
+    def max: (Integer? maximum) -> Relationship
+
+    def length: (Integer? minimum, Integer? maximum) -> Relationship
+
+    def unbounded: () -> Relationship
+
+    # The inline predicate `-[r WHERE condition]->`.
+    def where: (condition_like condition) -> Relationship
+
+    # `-[:X]->{1,3}`: a quantifier on the relationship only.
+    def quantify_relationship: (QuantifiedPathPattern::Quantifier quantifier) -> Relationship
+
+    # `((a)-[:X]->(b)){1,3}`: a quantifier on the whole pattern.
+    def quantify: (QuantifiedPathPattern::Quantifier quantifier) -> QuantifiedPathPattern
+
+    # The pattern as a predicate, `WHERE (a)-[:X]->(b)`.
+    def as_condition: () -> RelationshipPatternCondition
+
+    # `r.prop`; the property keeps this relationship as its container (index hints need the type).
+    def property: (*String | Symbol | Expression names) -> Property
+
+    # `r += {…}` and `r = {…}`, for use in SET.
+    def mutate: (expression_like expression) -> Operation
+
+    def set: (expression_like expression) -> Operation
+
+    # The map projection `r{…}`, built on the (possibly generated) name.
+    def project: (*String | Symbol | Expression | Array[String | Symbol | Expression] entries) -> MapProjection
+
+    # `elementId(r)`.
+    def element_id: () -> FunctionInvocation
+
+    def relationship_to: (Node other, *String | Symbol types) -> RelationshipChain
+
+    def relationship_from: (Node other, *String | Symbol types) -> RelationshipChain
+
+    def relationship_between: (Node other, *String | Symbol types) -> RelationshipChain
+
+    private
+
+    # The generated name of an unnamed relationship, kept once handed out.
+    def generated_name: () -> SymbolicName
+
+    # untyped: a `**changes` splat forwarded to `Details#with`; the keys are the members of `Details`.
+    def with_details: (**untyped changes) -> Relationship
+  end
+end

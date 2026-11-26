@@ -1,0 +1,43 @@
+module CypherDSL
+  # A whole path pattern with a quantifier, `((a)-[:X]->(b)){1,3}`, optionally
+  # with an inline WHERE. Built with `relationship.quantify(quantifier)`.
+  #
+  # Quantifiers come from {.interval}, {.plus} and {.star}; a relationship-only
+  # quantifier (`-[:X]->{1,3}`) is applied with `quantify_relationship`.
+  class QuantifiedPathPattern
+    @pattern: Relationship | RelationshipChain
+
+    @quantifier: Quantifier
+
+    @where_condition: Condition?
+
+    # `{lower,upper}`, `+` or `*`.
+    class Quantifier < Data
+      attr_reader lower: Integer?
+      attr_reader upper: Integer?
+      attr_reader symbol: String?
+
+      def self.new: (lower: Integer?, upper: Integer?, symbol: String?) -> instance
+
+      def with: (?lower: Integer?, ?upper: Integer?, ?symbol: String?) -> instance
+
+      def to_cypher: () -> String
+    end
+
+    def self.interval: (Integer? lower, Integer? upper) -> Quantifier
+
+    def self.plus: () -> Quantifier
+
+    def self.star: () -> Quantifier
+
+    attr_reader pattern: Relationship | RelationshipChain
+
+    attr_reader quantifier: Quantifier
+
+    attr_reader where_condition: Condition?
+
+    def initialize: (Relationship | RelationshipChain pattern, Quantifier quantifier, ?where_condition: Condition?) -> void
+
+    def where: (condition_like condition) -> QuantifiedPathPattern
+  end
+end

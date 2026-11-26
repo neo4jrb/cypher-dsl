@@ -1,0 +1,39 @@
+module CypherDSL
+  class Renderer
+    class Visitor
+      # Rendering of node labels: plain names and {Labels} expressions, dynamic
+      # (`:$($labels)`) where the dialect allows it, static otherwise.
+      module LabelRendering : _VisitorInternals
+        @configuration: Configuration
+
+        STATIC_MESSAGE: String
+
+        # One label entry including its leading colon. Shared with the other mixins
+        # (private in Ruby, see _VisitorInternals).
+        def render_label: (String | Labels label) -> String
+
+        private
+
+        def render_labels_expression: (Labels labels) -> String
+
+        def static_renderable?: (Labels labels) -> bool
+
+        # Pre-5.26: the label names are taken from literals and parameter values and rendered as `:A:B`.
+        def render_static_labels: (Labels labels) -> String
+
+        # untyped: a label value (`String`, `Parameter`, `ListExpression`, `Literal`, `Array`); the method
+        # recurses into parameter values, which are arbitrary host data.
+        def static_label_names: (untyped value) -> Array[String]
+
+        # Mirrors the Java renderer's bracketing rules for `&`, `|` and `!`.
+        def render_labels_tree: (Labels labels, Symbol? parent) -> String
+
+        def render_label_values: (Labels labels, Symbol current) -> String
+
+        # untyped: a `Labels::Value`; its `value` is a `String` for the `:static` modifier and an
+        # expression otherwise, which the modifier tag cannot narrow.
+        def render_label_value: (untyped value) -> String?
+      end
+    end
+  end
+end

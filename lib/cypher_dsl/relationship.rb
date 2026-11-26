@@ -8,6 +8,7 @@ module CypherDSL
 
     # Everything between the brackets plus the direction and a relationship quantifier.
     Details = Data.define(:types, :symbolic_name, :properties, :min, :max, :unbounded, :where, :quantifier) do
+      # @implements Relationship::Details
       def empty?
         symbolic_name.nil? && types.empty? && properties.nil? && !length? && where.nil?
       end
@@ -48,9 +49,7 @@ module CypherDSL
     def named? = !symbolic_name.nil?
 
     # The name of this relationship, generating one if it has none.
-    def required_symbolic_name
-      details.symbolic_name || (@generated_name ||= SymbolicName.unresolved(details.types.first&.downcase || 'r'))
-    end
+    def required_symbolic_name = details.symbolic_name || generated_name
     alias as_expression required_symbolic_name
 
     def named(name) = with_details(symbolic_name: SymbolicName.of(name))
@@ -96,6 +95,8 @@ module CypherDSL
     def relationship_between(other, *types) = RelationshipChain.new([self]).relationship_between(other, *types)
 
     private
+
+    def generated_name = @generated_name ||= SymbolicName.unresolved(details.types.first&.downcase || 'r')
 
     def with_details(**changes)
       Relationship.new(left, direction, right, details.with(**changes))

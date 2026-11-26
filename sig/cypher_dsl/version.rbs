@@ -1,0 +1,3 @@
+module CypherDSL
+  VERSION: String
+end

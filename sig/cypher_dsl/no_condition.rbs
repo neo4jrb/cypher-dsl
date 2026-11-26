@@ -1,0 +1,15 @@
+module CypherDSL
+  # The empty condition: it renders nothing and disappears when combined with
+  # another condition, which lets callers build conditions incrementally.
+  class NoCondition < Condition
+    INSTANCE: NoCondition
+
+    def and: (condition_like other) -> Condition
+
+    def or: (condition_like other) -> Condition
+
+    def xor: (condition_like other) -> Condition
+
+    def not: () -> self
+  end
+end

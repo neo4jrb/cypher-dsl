@@ -1,0 +1,28 @@
+name: Reek
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore: [ '**/*.md', 'lib/cypher_dsl/version.rb' ]
+  pull_request:
+    paths-ignore: [ '**/*.md', 'lib/cypher_dsl/version.rb' ]
+
+permissions:
+  contents: read
+
+jobs:
+  reek:
+    name: reek
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      # The .reek.yml baseline keeps this green on existing code, so a failure
+      # here means a new code smell was introduced.
+      - name: Run Reek
+        run: bundle exec reek --format github lib

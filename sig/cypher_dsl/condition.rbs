@@ -1,0 +1,25 @@
+module CypherDSL
+  # Base class of boolean expressions; supports chaining with `and`, `or`, `xor` and `not`.
+  # Relationship patterns are accepted wherever a condition is expected.
+  class Condition
+    include Expression
+
+    def self.coerce: (condition_like value) -> Condition
+
+    def and: (condition_like other) -> Condition
+
+    def or: (condition_like other) -> Condition
+
+    def xor: (condition_like other) -> Condition
+
+    def not: () -> Condition
+
+    private
+
+    # Chaining conditions flattens same-operator chains; chaining a relationship
+    # pattern (the Java overload) wraps without flattening, as upstream does.
+    def combine: (String operator, condition_like other) -> Condition
+
+    def pattern?: (condition_like value) -> bool
+  end
+end

@@ -1,0 +1,24 @@
+module CypherDSL
+  # Factory methods for clause objects, mirroring the Java `Clauses` class. Most
+  # code goes through the {StatementBuilder}; these exist for building clause
+  # lists by hand, e.g. the body of a FOREACH.
+  module Clauses
+    UPDATING_MESSAGE: String
+
+    # True for any clause object.
+    def self.clause?: (Object object) -> bool
+
+    # True for the clauses allowed inside FOREACH.
+    def self.updating?: (Object clause) -> bool
+
+    def self?.for_each: (name_like variable, expression_like list, Array[updating_clause] clauses) -> Foreach
+
+    def self?.merge: (Array[pattern_element] pattern_elements, ?Array[MergeAction] actions) -> Merge
+
+    def self?.set: (Array[operation] operations) -> Set
+
+    def self?.remove: (Array[remove_item] items) -> Remove
+
+    def self?.delete: (bool detach, Array[expression_like] expressions) -> Delete
+  end
+end

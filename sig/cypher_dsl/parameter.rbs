@@ -1,0 +1,38 @@
+module CypherDSL
+  # A query parameter, rendered as `$name`, optionally carrying its value.
+  # An anonymous parameter has no name of its own; the renderer assigns
+  # `pcdsl01`, `pcdsl02`, … per statement, sharing a name between anonymous
+  # parameters with equal values.
+  class Parameter
+    include Expression
+
+    # The marker for a parameter without a value.
+    NO_VALUE: Object
+
+    # `nil` for an anonymous parameter.
+    attr_reader name: String?
+
+    # untyped: the value is any Ruby object handed to the driver, or {NO_VALUE}.
+    attr_reader value: untyped
+
+    def self.anonymous: (untyped value) -> Parameter
+
+    # A leading `$` in the name is tolerated and dropped.
+    def initialize: ((String | Symbol)? name, ?untyped value) -> void
+
+    def with_value: (untyped value) -> Parameter
+
+    def anonymous?: () -> bool
+
+    def value?: () -> bool
+
+    # Named parameters are equal by name and value, anonymous ones by value.
+    def ==: (untyped other) -> bool
+
+    alias eql? ==
+
+    def hash: () -> Integer
+
+    def to_s: () -> String
+  end
+end

@@ -41,7 +41,8 @@ module CypherDSL
     end
 
     def update_last
-      RelationshipChain.new(relationships[0...-1] + [yield(relationships.last)])
+      head = relationships[0...-1] #: Array[Relationship]
+      RelationshipChain.new(head + [yield(relationships.last)])
     end
   end
 end

@@ -18,13 +18,14 @@ module CypherDSL
 
     # `match(pattern, …)` or, as in Java, `match(optional, pattern, …)` with a leading flag.
     def match(*pattern_elements)
-      optional = [true, false].include?(pattern_elements.first) ? pattern_elements.shift : false
+      optional = [true, false].include?(pattern_elements.first) ? pattern_elements.shift : false #: bool
       raise ArgumentError, 'Patterns to match are required.' if pattern_elements.any?(&:nil?)
 
       pattern_elements = pattern_elements.flatten.freeze
       raise ArgumentError, 'At least one pattern to match is required.' if pattern_elements.empty?
 
-      append(Clauses::Match.new(optional:, pattern_elements:, hints: [].freeze, search: nil, where: nil), :condition)
+      hints = [] #: Array[Hint]
+      append(Clauses::Match.new(optional:, pattern_elements:, hints: hints.freeze, search: nil, where: nil), :condition)
     end
 
     # A vector `SEARCH` on the preceding MATCH; see {Search}.
@@ -54,6 +55,7 @@ module CypherDSL
     end
 
     def and(argument)
+      # @type var argument: untyped
       case @mode
       when :order then add_sort_item(argument)
       when :condition then update_last(:condition) { |clause| clause.with(where: clause.where.and(argument)) }
@@ -109,7 +111,8 @@ module CypherDSL
     def create(*pattern_elements) = append(Clauses::Create.new(pattern_elements: pattern_elements.flatten.freeze), nil)
 
     def merge(*pattern_elements)
-      append(Clauses::Merge.new(pattern_elements: pattern_elements.flatten.freeze, actions: [].freeze), nil)
+      actions = [] #: Array[MergeAction]
+      append(Clauses::Merge.new(pattern_elements: pattern_elements.flatten.freeze, actions: actions.freeze), nil)
     end
 
     # `on_match.set(…)` / `on_create.mutate(…)` after a MERGE.
@@ -142,6 +145,7 @@ module CypherDSL
     # `call('db.labels').with_args(…).yield(…)` for a procedure, or
     # `call(statement, imports…)` for a `CALL { subquery }`.
     def call(*arguments)
+      # @type var arguments: untyped
       return StandaloneCall.new(arguments, builder: self) unless arguments.first.is_a?(Statement)
 
       statement, *imports = arguments
@@ -150,7 +154,7 @@ module CypherDSL
 
     # `CALL { subquery } IN TRANSACTIONS [OF n ROWS]`; `call_in_transactions(statement, [rows], imports…)`.
     def call_in_transactions(statement, *arguments)
-      rows = arguments.first.is_a?(Integer) ? arguments.shift : nil
+      rows = arguments.first.is_a?(Integer) ? arguments.shift : nil #: Integer?
       append(subquery_clause(statement, arguments, in_transactions: true, rows:), nil)
     end
 
@@ -308,7 +312,8 @@ module CypherDSL
     def update_last(mode)
       raise ArgumentError, 'There is no clause to refine yet.' if @clauses.empty?
 
-      StatementBuilder.new(@clauses[0...-1] + [yield(@clauses.last)], mode)
+      preceding = @clauses[0...-1] #: Array[Clauses::clause]
+      StatementBuilder.new(preceding + [yield(@clauses.last)], mode)
     end
 
     def return_clause(distinct, expressions)

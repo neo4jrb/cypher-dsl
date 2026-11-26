@@ -1,0 +1,18 @@
+module CypherDSL
+  # `COUNT { pattern [WHERE …] }` / `COUNT { [WITH imports] statement }`.
+  class CountExpression
+    include Expression
+
+    # A statement (subquery form) or a pattern.
+    attr_reader body: Statement | pattern_element
+
+    attr_reader imports: Array[Expression]
+
+    attr_reader where_condition: Condition?
+
+    def initialize: (Statement | pattern_element body, ?Array[Expression] imports, ?where_condition: Condition?) -> void
+
+    # `COUNT { pattern WHERE condition }`.
+    def where: (condition_like condition) -> CountExpression
+  end
+end

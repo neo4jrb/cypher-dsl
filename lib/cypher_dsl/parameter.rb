@@ -17,7 +17,8 @@ module CypherDSL
     # A leading `$` in the name is tolerated and dropped.
     def initialize(name, value = NO_VALUE)
       @name = name&.to_s&.delete_prefix('$')
-      raise ArgumentError, 'A parameter name must not be empty.' if @name && @name.empty?
+      # Steep does not narrow instance variables.
+      raise ArgumentError, 'A parameter name must not be empty.' if @name && @name.empty? # steep:ignore NoMethod
 
       @value = value
       freeze

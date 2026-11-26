@@ -1,0 +1,20 @@
+module CypherDSL
+  module Clauses
+    # `[USING PERIODIC COMMIT [rate]] LOAD CSV [WITH HEADERS] FROM 'uri' AS alias [FIELDTERMINATOR ';']`.
+    # `periodic_commit` is nil, `true` or the commit rate.
+    class LoadCsv < Data
+      attr_reader uri: String
+      attr_reader with_headers: bool
+      attr_reader alias_name: SymbolicName
+      attr_reader field_terminator: String?
+      attr_reader periodic_commit: (Integer | bool)?
+
+      def self.new: (uri: String, with_headers: bool, alias_name: SymbolicName, field_terminator: String?, periodic_commit: (Integer | bool)?) -> instance
+
+      def with: (?uri: String, ?with_headers: bool, ?alias_name: SymbolicName, ?field_terminator: String?, ?periodic_commit: (Integer | bool)?) -> instance
+
+      # A blank terminator leaves the clause as it is.
+      def with_field_terminator: (String? terminator) -> instance
+    end
+  end
+end

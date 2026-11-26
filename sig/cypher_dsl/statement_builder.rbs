@@ -1,0 +1,274 @@
+module CypherDSL
+  # Builds a {Statement} clause by clause. Every method returns a new builder;
+  # the last clause stays open for refinement (WHERE on MATCH/WITH, ORDER BY,
+  # SKIP and LIMIT on RETURN/WITH) until the next clause is added.
+  #
+  # `and` is overloaded as in the Java API: after `where` it extends the
+  # condition, after `order_by` it adds another sort item.
+  class StatementBuilder
+    # What the last clause can still be refined with: `:condition` for WHERE
+    # (MATCH, WITH), `:projection` for ORDER BY / SKIP / LIMIT (RETURN), `:order`
+    # once an ORDER BY is present, `nil` for nothing.
+    type mode = :condition | :order | :projection | nil
+
+    # A pattern argument of MATCH, CREATE and MERGE; arrays are flattened.
+    type pattern_argument = pattern_element | Array[pattern_argument]
+
+    # An item of RETURN, WITH, DELETE or the imports of a subquery: strings and
+    # symbols name variables, nodes and relationships stand for their names,
+    # anything else is coerced to an expression; arrays are flattened.
+    type projection_item = name_like | Node | Relationship | expression_like | Array[projection_item]
+
+    # An ORDER BY item: a ready {SortItem} or an expression sorted in the default
+    # direction; arrays are flattened.
+    type sort_argument = SortItem | expression_like | Array[sort_argument]
+
+    # One operation of a SET clause: `n.p.to(x)`, `n.mutate(map)`,
+    # `Cypher.set_label(n, 'A')` or a raw fragment.
+    type set_operation = Operation | LabelOperation | RawExpression
+
+    # Arguments of `set`: complete operations, a node followed by labels
+    # (`set(n, 'A', :B)`), or an even list of target/value pairs; arrays are flattened.
+    type set_argument = set_operation | Labels | Symbol | expression_like | Array[set_argument]
+
+    # Arguments of `remove`: properties, label operations, a node followed by
+    # labels (`remove(n, 'A', :B)`), or a raw fragment; arrays are flattened.
+    type remove_argument = Property | LabelOperation | RawExpression | Node | Labels | String | Symbol | Array[remove_argument]
+
+    @clauses: Array[Clauses::clause]
+
+    @mode: mode
+
+    def initialize: (?Array[Clauses::clause] clauses, ?mode mode) -> void
+
+    # --- reading ---------------------------------------------------------
+
+    # `match(pattern, …)` or, as in Java, `match(optional, pattern, …)` with a leading flag.
+    def match: (*(bool | pattern_argument) pattern_elements) -> instance
+
+    # A vector `SEARCH` on the preceding MATCH; see {Search}.
+    def search: (Search search) -> instance
+
+    def optional_match: (*pattern_argument pattern_elements) -> instance
+
+    # Planner hints on the preceding MATCH: `using_index(n.property(:name))`,
+    # `using_index_seek(…)`, `using_scan(n)`, `using_join_on(n, m)`.
+    def using_index: (*(Property | Array[Property]) properties) -> instance
+
+    def using_index_seek: (*(Property | Array[Property]) properties) -> instance
+
+    def using_scan: (Node node) -> instance
+
+    def using_join_on: (*(Node | name_like | Array[Node | name_like]) nodes_or_names) -> instance
+
+    def where: (condition_like condition) -> instance
+
+    # After `where`: another condition joined with AND; after `order_by`: another sort item.
+    def and: (condition_like | sort_argument argument) -> instance
+
+    def or: (condition_like condition) -> instance
+
+    def xor: (condition_like condition) -> instance
+
+    # --- projecting ------------------------------------------------------
+
+    def returning: (*projection_item expressions) -> instance
+
+    def returning_distinct: (*projection_item expressions) -> instance
+
+    # A projection rendered without the RETURN keyword, for raw fragments that carry their own.
+    def returning_raw: (*projection_item expressions) -> instance
+
+    def with: (*projection_item expressions) -> instance
+
+    def with_distinct: (*projection_item expressions) -> instance
+
+    # The names and expressions in scope after the last WITH or RETURN, as
+    # `getIdentifiableExpressions()` on the Java builder states.
+    def identifiable_expressions: () -> Array[Expression]
+
+    def order_by: (*sort_argument sort_items) -> instance
+
+    def ascending: () -> instance
+
+    def descending: () -> instance
+
+    def skip: (expression_like amount) -> instance
+
+    def limit: (expression_like amount) -> instance
+
+    alias take limit
+
+    # `unwind(list).as(:item)`; `as` completes the clause. Several arguments, or
+    # an array, form a list literal.
+    def unwind: (*expression_like expressions) -> OngoingUnwind
+
+    # --- updating --------------------------------------------------------
+
+    def create: (*pattern_argument pattern_elements) -> instance
+
+    def merge: (*pattern_argument pattern_elements) -> instance
+
+    # `on_match.set(…)` / `on_create.mutate(…)` after a MERGE.
+    def on_match: () -> MergeActionBuilder
+
+    def on_create: () -> MergeActionBuilder
+
+    # Accepts operations (`n.p.to(x)`, `n.mutate(map)`), a node followed by
+    # labels (`set(n, 'A', 'B')`), or an even list of target/value pairs.
+    def set: (*set_argument arguments) -> instance
+
+    # `SET target += expression`.
+    def mutate: (Expression target, expression_like expression) -> instance
+
+    # Accepts properties, or a node followed by labels (`remove(n, 'A', 'B')`).
+    def remove: (*remove_argument arguments) -> instance
+
+    def delete: (*projection_item expressions) -> instance
+
+    def detach_delete: (*projection_item expressions) -> instance
+
+    # `foreach(:i).in(list).apply(clause, …)`.
+    def foreach: (name_like variable) -> OngoingForeach
+
+    # `call('db.labels').with_args(…).yield(…)` for a procedure (the name in one or
+    # more parts), or `call(statement, imports…)` for a `CALL { subquery }`; the
+    # first argument decides which.
+    def call: (*(Statement | String | Symbol | expression_like) arguments) -> (instance | StandaloneCall)
+
+    # `CALL { subquery } IN TRANSACTIONS [OF n ROWS]`; `call_in_transactions(statement, [rows], imports…)`.
+    def call_in_transactions: (Statement statement, *(Integer | expression_like) arguments) -> instance
+
+    # `CALL (*) { raw cypher }`.
+    def call_raw_cypher: (String cypher) -> instance
+
+    # `load_csv('file:///x.csv').as(:line)`.
+    def load_csv: (String | Symbol uri, ?bool positional_headers, ?with_headers: bool, ?periodic_commit: (Integer | bool)?) -> OngoingLoadCsv
+
+    # `FIELDTERMINATOR ';'` on the preceding LOAD CSV.
+    def with_field_terminator: ((String | Symbol)? terminator) -> instance
+
+    # The statement built so far as an `EXISTS { … }` condition.
+    def as_condition: () -> ExistsCondition
+
+    # --- escape hatch ----------------------------------------------------
+
+    # A clause rendered verbatim, for Cypher the builder does not model, e.g.
+    # `raw_clause('CALL db.labels() YIELD label')`. Takes the arguments of
+    # `Cypher.raw` (a format with `$E` placeholders) or a ready {RawExpression}.
+    # The next clause starts afresh: a raw clause cannot be refined with WHERE,
+    # ORDER BY, SKIP or LIMIT.
+    def raw_clause: (String | RawExpression format, *Expression arguments) -> instance
+
+    # --- finishing -------------------------------------------------------
+
+    # Continues with the clauses of another statement, e.g. after a `CALL … YIELD`.
+    def and_then: (Statement statement) -> instance
+
+    def finish: () -> instance
+
+    def build: () -> Statement
+
+    def explain: () -> Statement
+
+    def profile: () -> Statement
+
+    # Intermediate state of `unwind(expression)` waiting for `as(variable)`.
+    class OngoingUnwind
+      @builder: StatementBuilder
+
+      @expression: Expression
+
+      def initialize: (StatementBuilder builder, Expression expression) -> void
+
+      def as: (name_like variable) -> StatementBuilder
+    end
+
+    # Intermediate states of `foreach(variable)`: `in(list)` then `apply(clauses…)`.
+    class OngoingForeach
+      @builder: StatementBuilder
+
+      @variable: SymbolicName
+
+      @list: Expression?
+
+      def initialize: (StatementBuilder builder, SymbolicName variable, ?Expression? list) -> void
+
+      def in: (expression_like list) -> OngoingForeach
+
+      def apply: (*(Clauses::updating_clause | Array[Clauses::updating_clause]) clauses) -> StatementBuilder
+    end
+
+    # Intermediate state of `load_csv(uri)` waiting for `as(alias)`.
+    class OngoingLoadCsv
+      @builder: StatementBuilder
+
+      @uri: String
+
+      @with_headers: bool
+
+      @periodic_commit: (Integer | bool)?
+
+      def initialize: (StatementBuilder builder, String uri, bool with_headers, (Integer | bool)? periodic_commit) -> void
+
+      def as: (name_like alias_name) -> StatementBuilder
+    end
+
+    # Intermediate state after `on_match` / `on_create`, waiting for `set` or `mutate`.
+    class MergeActionBuilder
+      type action = :on_match | :on_create
+
+      @builder: StatementBuilder
+
+      @type: action
+
+      def initialize: (StatementBuilder builder, action `type`) -> void
+
+      def set: (*set_argument arguments) -> StatementBuilder
+
+      def mutate: (Expression target, expression_like expression) -> StatementBuilder
+    end
+
+    private
+
+    attr_reader clauses: Array[Clauses::clause]
+
+    def append: (Clauses::clause clause, mode mode) -> instance
+
+    def subquery_clause: (Statement statement, Array[expression_like] imports, in_transactions: bool, rows: Integer?) -> Clauses::CallSubquery
+
+    def add_hint: (Hint hint) -> instance
+
+    def add_merge_action: (MergeActionBuilder::action `type`, Array[set_operation] operations) -> instance
+
+    def operations_for_set: (Array[set_argument] arguments) -> Array[set_operation]
+
+    # A raw fragment such as `Cypher.raw("n.name = 'x'")` counts as a complete operation.
+    def operation?: (untyped argument) -> bool
+
+    def label_operation?: (Array[untyped] arguments) -> bool
+
+    def optional_expression: (expression_like value) -> Expression?
+
+    # Replaces the last clause with the block's result. Which kind of clause the
+    # block receives depends on `@mode` and is guarded at runtime (the callers
+    # `raise` on an unexpected clause), so it stays untyped here.
+    def update_last: (mode mode) { (untyped clause) -> Clauses::clause } -> instance
+
+    def return_clause: (bool distinct, Array[projection_item] expressions) -> Clauses::Return
+
+    # RETURN/WITH items with the upstream preconditions.
+    def projection_items: (Array[projection_item] expressions) -> Array[Expression]
+
+    def add_sort_item: (sort_argument expression) -> instance
+
+    def update_last_sort_item: () { (SortItem) -> SortItem } -> instance
+
+    # RETURN/WITH items: strings and symbols name variables, nodes and
+    # relationships stand for their (possibly generated) names, everything else
+    # is an expression.
+    def coerce_items: (Array[projection_item] expressions) -> Array[Expression]
+
+    def coerce_sort_items: (Array[sort_argument] sort_items) -> Array[SortItem]
+  end
+end

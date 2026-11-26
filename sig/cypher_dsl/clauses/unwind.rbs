@@ -1,0 +1,13 @@
+module CypherDSL
+  module Clauses
+    # `UNWIND expression AS variable`.
+    class Unwind < Data
+      attr_reader expression: Expression
+      attr_reader variable: SymbolicName
+
+      def self.new: (expression: Expression, variable: SymbolicName) -> instance
+
+      def with: (?expression: Expression, ?variable: SymbolicName) -> instance
+    end
+  end
+end

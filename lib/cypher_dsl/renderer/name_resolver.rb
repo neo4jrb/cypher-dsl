@@ -7,7 +7,7 @@ module CypherDSL
     # for elements that were referenced without ever being named.
     class NameResolver
       def initialize
-        @context_names = {}.compare_by_identity
+        @context_names = {}.compare_by_identity # steep:ignore UnannotatedEmptyCollection
       end
 
       def resolve(symbolic_name, in_entity: false) # rubocop:disable Lint/UnusedMethodArgument

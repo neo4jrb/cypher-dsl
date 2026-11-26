@@ -1,0 +1,10 @@
+module CypherDSL
+  module Clauses
+    # `FINISH`: terminates a query without returning rows (Neo4j 5.19+).
+    class Finish < Data
+      def self.new: () -> instance
+
+      def with: () -> instance
+    end
+  end
+end

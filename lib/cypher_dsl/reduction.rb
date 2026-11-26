@@ -21,13 +21,17 @@ module CypherDSL
 
     # The intermediate states; `with_initial_value_of` completes the reduction.
     Ongoing = Data.define(:variable, :list, :mapper, :accumulator) do
+      # @implements Reduction::Ongoing
       def in(list) = with(list: Expression.coerce(list))
       def map(mapper) = with(mapper: Expression.coerce(mapper))
       def accumulate_on(accumulator) = with(accumulator: Expression.coerce(accumulator))
 
+      # The steps are nil until `in`, `map` and `accumulate_on` were called, which Steep cannot see.
+      # steep:ignore:start
       def with_initial_value_of(initial_value)
         Reduction.new(variable:, list:, mapper:, accumulator:, initial_value: Expression.coerce(initial_value))
       end
+      # steep:ignore:end
     end
   end
 end

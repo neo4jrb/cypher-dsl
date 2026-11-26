@@ -1,0 +1,41 @@
+module CypherDSL
+  # A variable name, such as the `n` in `MATCH (n)`.
+  #
+  # An *unresolved* name has no value yet: it is handed out when an unnamed
+  # node or relationship needs a name, and the renderer generates one for it.
+  class SymbolicName
+    include Expression
+
+    # The name; `nil` for an unresolved name.
+    attr_reader value: String?
+
+    # The seed of a generated name (letters only); `nil` for a resolved name.
+    attr_reader hint: String?
+
+    def self.of: (name_like value) -> SymbolicName
+
+    # A name to be generated at render time; `hint` seeds the generated name (letters only).
+    def self.unresolved: (?String | Symbol hint) -> SymbolicName
+
+    def initialize: (String? value, ?hint: String?) -> void
+
+    def resolved?: () -> bool
+
+    # A name is its own name; lets names stand in for named elements (e.g. `nodes(p)`).
+    def required_symbolic_name: () -> SymbolicName
+
+    # The map projection `name{…}`.
+    def project: (*MapProjection::raw_entry | Array[MapProjection::raw_entry] entries) -> MapProjection
+
+    def property: (*Property::name_like names) -> Property
+
+    # Resolved names are equal by value; unresolved ones only to themselves.
+    def ==: (untyped other) -> bool
+
+    alias eql? ==
+
+    def hash: () -> Integer
+
+    def to_s: () -> String
+  end
+end

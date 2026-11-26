@@ -110,13 +110,13 @@ module CypherDSL
       def generated_name_flags(value)
         flags = case value
                 when true then GENERATED_NAMES
-                when false, nil then []
+                when false, nil then [] # steep:ignore UnannotatedEmptyCollection
                 else value.to_a.map(&:to_sym)
                 end
         unknown = flags - GENERATED_NAMES
         raise ArgumentError, "Unknown generated name flags #{unknown.inspect}" unless unknown.empty?
 
-        flags.to_set.freeze
+        flags.to_set.freeze #: Set[generated_name]
       end
     end
   end

@@ -1,0 +1,12 @@
+module CypherDSL
+  module Clauses
+    # `USE graph`; the graph is a plain name or an expression such as `graph.byName(…)`.
+    class Use < Data
+      attr_reader graph: String | Expression
+
+      def self.new: (graph: String | Expression) -> instance
+
+      def with: (?graph: String | Expression) -> instance
+    end
+  end
+end

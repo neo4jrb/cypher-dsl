@@ -1,0 +1,8 @@
+module CypherDSL
+  # The `*` in `RETURN *`.
+  class Asterisk
+    include Expression
+
+    INSTANCE: Asterisk
+  end
+end

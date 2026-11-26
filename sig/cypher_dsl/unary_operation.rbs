@@ -1,0 +1,12 @@
+module CypherDSL
+  # A prefix operation such as `-x` or `+x`.
+  class UnaryOperation
+    include Expression
+
+    attr_reader operator: String
+
+    attr_reader expression: Expression
+
+    def initialize: (String operator, Expression expression) -> void
+  end
+end

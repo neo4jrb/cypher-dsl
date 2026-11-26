@@ -1,0 +1,17 @@
+module CypherDSL
+  module Clauses
+    # `WITH [DISTINCT] items [ORDER BY …] [SKIP …] [LIMIT …] [WHERE …]`; ends a query part.
+    class With < Data
+      attr_reader distinct: bool
+      attr_reader items: Array[Expression]
+      attr_reader order: Order?
+      attr_reader skip: Expression?
+      attr_reader limit: Expression?
+      attr_reader where: Condition?
+
+      def self.new: (distinct: bool, items: Array[Expression], order: Order?, skip: Expression?, limit: Expression?, where: Condition?) -> instance
+
+      def with: (?distinct: bool, ?items: Array[Expression], ?order: Order?, ?skip: Expression?, ?limit: Expression?, ?where: Condition?) -> instance
+    end
+  end
+end

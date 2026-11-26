@@ -1,0 +1,29 @@
+module CypherDSL
+  # `[pattern WHERE condition | expression]`. Built with `Cypher.list_based_on(pattern)`,
+  # refined with `where`/`and`/`or`, completed with `returning`.
+  class PatternComprehension
+    include Expression
+
+    attr_reader pattern: pattern_element
+
+    attr_reader where_condition: Condition?
+
+    # `nil` until `returning` was called.
+    attr_reader projection: Array[Expression]?
+
+    def initialize: (pattern_element pattern, ?where_condition: Condition?, ?projection: Array[Expression]?) -> void
+
+    def where: (condition_like condition) -> PatternComprehension
+
+    def and: (condition_like condition) -> PatternComprehension
+
+    def or: (condition_like condition) -> PatternComprehension
+
+    def returning: (*expression_like expressions) -> PatternComprehension
+
+    private
+
+    # untyped: `changes` is any subset of the keyword arguments of `initialize`.
+    def with: (**untyped changes) -> PatternComprehension
+  end
+end

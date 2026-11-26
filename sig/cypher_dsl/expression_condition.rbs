@@ -1,0 +1,8 @@
+module CypherDSL
+  # Any expression used where a condition is expected, e.g. a CASE expression in WHERE.
+  class ExpressionCondition < Condition
+    attr_reader expression: Expression
+
+    def initialize: (Expression expression) -> void
+  end
+end

@@ -1,0 +1,16 @@
+module CypherDSL
+  module Clauses
+    # `[OPTIONAL] MATCH pattern [USING hint …] [SEARCH …] [WHERE condition]`.
+    class Match < Data
+      attr_reader optional: bool
+      attr_reader pattern_elements: Array[pattern_element]
+      attr_reader hints: Array[Hint]
+      attr_reader search: Search?
+      attr_reader where: Condition?
+
+      def self.new: (optional: bool, pattern_elements: Array[pattern_element], hints: Array[Hint], search: Search?, where: Condition?) -> instance
+
+      def with: (?optional: bool, ?pattern_elements: Array[pattern_element], ?hints: Array[Hint], ?search: Search?, ?where: Condition?) -> instance
+    end
+  end
+end

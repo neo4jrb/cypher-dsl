@@ -1,0 +1,63 @@
+module CypherDSL
+  # A fragment of Cypher text rendered verbatim: the escape hatch, like `Arel.sql`.
+  #
+  # `RawExpression.create(format, *arguments)` mirrors `Cypher.raw(format, args…)`:
+  # every `$E` in the format is replaced by the next argument (expressions as they are,
+  # anything else as a literal); `\$E` stands for a literal `$E`. A `$name` matching a
+  # named parameter among the arguments is bound to that parameter.
+  class RawExpression
+    include Expression
+
+    PLACEHOLDER: Regexp
+
+    EXPRESSION_PLACEHOLDER: String
+
+    # Strings and expressions, in order.
+    attr_reader parts: Array[String | Expression]
+
+    def self.create: (String format, *expression_like mixed_arguments) -> RawExpression
+
+    # `parts` is a string or a list of strings and expressions; `nil` parts are dropped.
+    def initialize: (String | Array[(String | Expression)?] parts) -> void
+
+    # The text, with expressions in their default rendering.
+    def content: () -> String
+
+    # Splits a format into text and the expressions bound to its placeholders.
+    class Parser
+      @format: String
+
+      # Named parameters among the arguments, by name.
+      @parameters: Hash[String?, Parameter]
+
+      # The arguments consumed positionally by `$E`, in order.
+      @positional: Array[expression_like]
+
+      @matches: Array[MatchData]
+
+      # Text slices may come out as `nil` at the format's end; {RawExpression#initialize} drops them.
+      @parts: Array[(String | Expression)?]
+
+      # The position in the format up to which text was consumed.
+      @index: Integer?
+
+      # How many positional arguments were consumed.
+      @count: Integer
+
+      # untyped: the arguments are `expression_like`s and named `Parameter`s; `grep(Parameter)`
+      # sorts them out at runtime.
+      def initialize: (String format, Array[untyped] mixed_arguments) -> void
+
+      def parts: () -> Array[(String | Expression)?]
+
+      private
+
+      def consume: (MatchData match) -> void
+
+      # A `nil` expression never happens: `consume` only binds placeholders it has an argument for.
+      def bind: (MatchData match, Expression? expression) -> void
+
+      def next_positional: () -> Expression
+    end
+  end
+end

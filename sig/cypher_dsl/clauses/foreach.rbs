@@ -1,0 +1,14 @@
+module CypherDSL
+  module Clauses
+    # `FOREACH (variable IN list | updating clauses)`.
+    class Foreach < Data
+      attr_reader variable: SymbolicName
+      attr_reader list: Expression
+      attr_reader clauses: Array[updating_clause]
+
+      def self.new: (variable: SymbolicName, list: Expression, clauses: Array[updating_clause]) -> instance
+
+      def with: (?variable: SymbolicName, ?list: Expression, ?clauses: Array[updating_clause]) -> instance
+    end
+  end
+end

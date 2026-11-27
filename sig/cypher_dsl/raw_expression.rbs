@@ -12,13 +12,15 @@ module CypherDSL
 
     EXPRESSION_PLACEHOLDER: String
 
-    # Strings and expressions, in order.
-    attr_reader parts: Array[String | Expression]
+    # Strings, expressions and sort items (`ORDER BY` fragments), in order.
+    type part = String | Expression | SortItem
+
+    attr_reader parts: Array[part]
 
     def self.create: (String format, *expression_like mixed_arguments) -> RawExpression
 
     # `parts` is a string or a list of strings and expressions; `nil` parts are dropped.
-    def initialize: (String | Array[(String | Expression)?] parts) -> void
+    def initialize: (String | Array[part?] parts) -> void
 
     # The text, with expressions in their default rendering.
     def content: () -> String

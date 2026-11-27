@@ -1,0 +1,5 @@
+# Standard library signatures the shipped RBS depends on, for `rbs collection`
+# in projects that use this gem (`Date` and `Time` literals).
+dependencies:
+  - name: date
+  - name: time

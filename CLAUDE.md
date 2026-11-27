@@ -55,7 +55,12 @@ rubocop-rspec), `reek` against the `.reek.yml` baseline, and `rbs validate` +
   new or changed public method needs its signature updated; Steep runs in
   strict mode, so `untyped` needs a `# untyped: <reason>` comment. Third-party
   signatures come from `rbs_collection.yaml` (`bundle exec rbs collection
-  install`, lock file committed, install dir git-ignored).
+  install`, lock file committed, install dir git-ignored); `sig/manifest.yaml`
+  declares the stdlib signatures the shipped `sig/` needs.
+- `typecheck/usage.rb` is a Steep target of public API calls that must type
+  check. Signatures must accept everything the method accepts at runtime;
+  prefer overloads over unions so the result type stays specific, and add the
+  call that exposed a too-narrow signature to that file.
 - Coverage: `COVERAGE=1 bundle exec rspec` (MRI only) writes
   `coverage/.resultset.json`; `rake coverage:enforce` fails on any executable
   line added or changed under `lib/` vs `origin/main` that no test hit.

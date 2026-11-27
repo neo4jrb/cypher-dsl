@@ -9,7 +9,11 @@ module CypherDSL
 
     attr_reader value: literal_value
 
-    def self.of: (expression_like value) -> Expression
+    def self.of: (Expression value) -> Expression
+               | (Hash[String | Symbol, expression_like] value) -> MapExpression
+               | (Array[expression_like] value) -> ListExpression
+               | (literal_value value) -> Literal
+               | (expression_like value) -> Expression
 
     # `'…'`, with backslashes and quotes escaped; `nil` quotes to `''`.
     def self.quote: (String? string) -> String

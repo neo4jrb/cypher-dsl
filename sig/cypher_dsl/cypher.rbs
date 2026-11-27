@@ -77,7 +77,11 @@ module CypherDSL
 
     # Wraps a Ruby value as a literal; expressions pass through unchanged, hashes
     # become map expressions and arrays list expressions.
-    def self?.literal_of: (expression_like value) -> Expression
+    def self?.literal_of: (Expression value) -> Expression
+                        | (Hash[String | Symbol, expression_like] value) -> MapExpression
+                        | (Array[expression_like] value) -> ListExpression
+                        | (literal_value value) -> Literal
+                        | (expression_like value) -> Expression
 
     def self?.literal_true: () -> Literal
 
@@ -128,7 +132,9 @@ module CypherDSL
     # `EXISTS { pattern }` / `EXISTS { pattern, pattern }` / `EXISTS { [WITH imports] statement }`.
     # A property gives the condition `n.prop IS NOT NULL` (`exists(n.prop)` on Neo4j 4), any other
     # plain expression the `exists(expr)` function.
-    def self?.exists: (Expression | ExistsCondition::body body, *expression_like imports) -> (Condition | FunctionInvocation)
+    def self?.exists: (Property property) -> PropertyExistsCondition
+                    | (ExistsCondition::body body, *expression_like imports) -> ExistsCondition
+                    | (Expression expression) -> FunctionInvocation
 
     # The classes that stand for a pattern rather than an expression in `exists`, `size` and `count`.
     PATTERN_TYPES: Array[Class]
@@ -203,11 +209,13 @@ module CypherDSL
 
     # `count(expression)`, or `COUNT { [WITH imports] pattern }` / `COUNT { … statement }`
     # for patterns and statements.
-    def self?.count: (expression_like | pattern_element | Statement expression_or_pattern, *expression_like imports) -> (FunctionInvocation | CountExpression)
+    def self?.count: (Statement | Relationship | RelationshipChain | QuantifiedPathPattern | NamedPath pattern_or_statement, *expression_like imports) -> CountExpression
+                   | (expression_like expression) -> FunctionInvocation
 
     # `Cypher.call('db.labels')` / `Cypher.call('db', 'labels')`: a procedure call (see {StandaloneCall});
     # `Cypher.call(statement, imports…)`: a `CALL { subquery }`. The first argument decides which.
-    def self?.call: (*(Statement | String | Symbol | expression_like) arguments) -> (StatementBuilder | StandaloneCall)
+    def self?.call: (Statement statement, *StatementBuilder::projection_item imports) -> StatementBuilder
+                  | (*StandaloneCall::name_part name_parts) -> StandaloneCall
 
     # `Cypher.use('graph', statement)`: the statement prefixed with `USE graph`. An
     # expression as the target (a name, literal or parameter) is wrapped in
@@ -232,7 +240,7 @@ module CypherDSL
     # Verbatim Cypher, the escape hatch: the format string first, then the expressions
     # its `$E` placeholders take in order (`\$E` is a literal `$E`); named placeholders
     # take a parameter of that name. See {RawExpression.create}.
-    def self?.raw: (*(String | Expression) format_and_arguments) -> RawExpression
+    def self?.raw: (String format, *expression_like arguments) -> RawExpression
 
     # Static comparison forms, `Cypher.gt(a, b)` etc.
     def self?.eq: (expression_like left, expression_like right) -> Condition

@@ -45,8 +45,7 @@ module CypherDSL
 
       # The Java `GeneratedNames` enum: which names get rewritten. `reuse_aliases` makes an alias
       # that is defined again reuse its generated name instead of getting a new one.
-      # Every element is a `generated_name`; typed `Array[Symbol]` because Steep infers `%i[]` as such.
-      GENERATED_NAMES: Array[Symbol]
+      GENERATED_NAMES: Array[generated_name]
 
       attr_reader always_escape_names: bool
       attr_reader dialect: Dialect::name

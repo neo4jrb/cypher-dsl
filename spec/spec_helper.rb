@@ -8,6 +8,9 @@ if !ENV['COVERAGE'].to_s.empty? && RUBY_PLATFORM != 'java'
   SimpleCov.start do
     enable_coverage :branch
     add_filter %r{^/spec/}
+    # Zeitwerk loads lazily: a new file no spec touches must still show up as uncovered.
+    # (version.rb is loaded by the gemspec before this point and stays outside the result.)
+    track_files 'lib/**/*.rb'
   end
 end
 

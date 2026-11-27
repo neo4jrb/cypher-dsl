@@ -96,24 +96,25 @@ module CypherDSL
     def range: (expression_like start_value, expression_like end_value, ?expression_like step) -> FunctionInvocation
 
     # The path, node or relationship functions take the named element and render its name, as in Java.
-    def nodes: (NamedPath path) -> FunctionInvocation
+    # The element helpers also take a `SymbolicName` standing for the path, node or relationship.
+    def nodes: (NamedPath | SymbolicName path) -> FunctionInvocation
 
-    def relationships: (NamedPath path) -> FunctionInvocation
+    def relationships: (NamedPath | SymbolicName path) -> FunctionInvocation
 
-    def length: (NamedPath path) -> FunctionInvocation
+    def length: (NamedPath | SymbolicName path) -> FunctionInvocation
 
-    def labels: (Node node) -> FunctionInvocation
+    def labels: (Node | SymbolicName node) -> FunctionInvocation
 
-    def type: (Relationship relationship) -> FunctionInvocation
+    def type: (Relationship | SymbolicName relationship) -> FunctionInvocation
 
-    def start_node: (Relationship relationship) -> FunctionInvocation
+    def start_node: (Relationship | SymbolicName relationship) -> FunctionInvocation
 
-    def end_node: (Relationship relationship) -> FunctionInvocation
+    def end_node: (Relationship | SymbolicName relationship) -> FunctionInvocation
 
-    def element_id: (Node | Relationship element) -> FunctionInvocation
+    def element_id: (Node | Relationship | SymbolicName element) -> FunctionInvocation
 
     # `id(n)`; deprecated in Neo4j 5 in favour of {#element_id}, kept for parity.
-    def id: (Node | Relationship element) -> FunctionInvocation
+    def id: (Node | Relationship | SymbolicName element) -> FunctionInvocation
 
     # `reduce(acc = initial, x IN list | mapper)`, built as
     # `reduce(:x).in(list).map(mapper).accumulate_on(acc).with_initial_value_of(0)`.

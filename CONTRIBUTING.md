@@ -25,9 +25,10 @@ Each check is its own workflow, so a failure names the tool at fault.
 | Test / diff-coverage | `COVERAGE=1 bundle exec rspec` then `rake coverage:enforce` | every executable line added or changed under `lib/` is hit by a test |
 | RuboCop | `bundle exec rubocop` | no offenses (`.rubocop.yml`, rubocop-performance, rubocop-rspec) |
 | Reek | `bundle exec reek lib` | no code smell beyond the `.reek.yml` baseline |
-| Types | `bundle exec rbs -I sig validate` and `bundle exec steep check` | `sig/` is valid and `lib/` type checks against it (strict) |
+| Types | `bundle exec rbs -I sig validate` and `bundle exec steep check` | `sig/` is valid, `lib/` and `typecheck/usage.rb` type check against it (strict) |
 
-Run them all locally with `bundle exec rake static`.
+Run them all locally with `bundle exec rake static` (on JRuby without the
+type checks, whose gems are MRI-only).
 
 ## Specs
 
@@ -43,6 +44,17 @@ Shared type aliases (`expression_like`, `name_like`, `condition_like`,
 `pattern_element`, `Clauses::clause`) live in `sig/cypher_dsl.rbs`. When you
 add or change a public method, update its signature; Steep runs in strict
 mode, so an `untyped` needs a `# untyped: <reason>` comment above it.
+
+Steep checks `lib/` against the signatures, which proves the implementation
+matches them but not that they accept every call the DSL supports. For that,
+`typecheck/usage.rb` holds public API calls that must type check, and it is a
+second Steep target. When a signature turns out narrower than the method (a
+reviewer or a consumer hits a supported call Steep rejects), widen the
+signature, usually with overloads so the result type stays specific, and add
+the call there.
+
+`sig/manifest.yaml` names the standard library signatures the shipped `sig/`
+depends on (`date`, `time`), for `rbs collection` in projects using the gem.
 
 ## Baselines
 

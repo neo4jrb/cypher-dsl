@@ -134,10 +134,11 @@ module CypherDSL
     # `call('db.labels').with_args(…).yield(…)` for a procedure (the name in one or
     # more parts), or `call(statement, imports…)` for a `CALL { subquery }`; the
     # first argument decides which.
-    def call: (*(Statement | String | Symbol | expression_like) arguments) -> (instance | StandaloneCall)
+    def call: (Statement statement, *projection_item imports) -> instance
+            | (*StandaloneCall::name_part name_parts) -> StandaloneCall
 
     # `CALL { subquery } IN TRANSACTIONS [OF n ROWS]`; `call_in_transactions(statement, [rows], imports…)`.
-    def call_in_transactions: (Statement statement, *(Integer | expression_like) arguments) -> instance
+    def call_in_transactions: (Statement statement, *(Integer | projection_item) arguments) -> instance
 
     # `CALL (*) { raw cypher }`.
     def call_raw_cypher: (String cypher) -> instance
@@ -158,7 +159,7 @@ module CypherDSL
     # `Cypher.raw` (a format with `$E` placeholders) or a ready {RawExpression}.
     # The next clause starts afresh: a raw clause cannot be refined with WHERE,
     # ORDER BY, SKIP or LIMIT.
-    def raw_clause: (String | RawExpression format, *Expression arguments) -> instance
+    def raw_clause: (String | RawExpression format, *expression_like arguments) -> instance
 
     # --- finishing -------------------------------------------------------
 
@@ -235,7 +236,7 @@ module CypherDSL
 
     def append: (Clauses::clause clause, mode mode) -> instance
 
-    def subquery_clause: (Statement statement, Array[expression_like] imports, in_transactions: bool, rows: Integer?) -> Clauses::CallSubquery
+    def subquery_clause: (Statement statement, Array[projection_item] imports, in_transactions: bool, rows: Integer?) -> Clauses::CallSubquery
 
     def add_hint: (Hint hint) -> instance
 

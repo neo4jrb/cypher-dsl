@@ -16,7 +16,9 @@ module CypherDSL
     class Configuration
       # The Java `GeneratedNames` enum: which names get rewritten. `reuse_aliases` makes an alias
       # that is defined again reuse its generated name instead of getting a new one.
-      GENERATED_NAMES = %i[entity_names parameter_names all_aliases internal_aliases_only reuse_aliases].freeze
+      GENERATED_NAMES = %i[
+        entity_names parameter_names all_aliases internal_aliases_only reuse_aliases
+      ].freeze #: Array[generated_name]
 
       attr_reader :always_escape_names, :dialect, :pretty_print, :indent_size, :indent_style, :disable_dynamic_labels,
                   :generated_names

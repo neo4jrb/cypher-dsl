@@ -203,7 +203,8 @@ module CypherDSL
 
     # `Cypher.call('db.labels')` / `Cypher.call('db', 'labels')`: a procedure call (see {StandaloneCall});
     # `Cypher.call(statement, imports…)`: a `CALL { subquery }`.
-    def call(*arguments)
+    # The two overloads of the signature differ in their first argument; Steep cannot match that to a splat.
+    def call(*arguments) # steep:ignore DifferentMethodParameterKind
       # @type var arguments: untyped
       return StatementBuilder.new.call(*arguments) if arguments.first.is_a?(Statement)
 
@@ -247,7 +248,7 @@ module CypherDSL
 
     # Verbatim Cypher, the escape hatch; `$E` placeholders take the arguments in
     # order, `\$E` is a literal `$E`. See {RawExpression.create}.
-    def raw(*) = RawExpression.create(*)
+    def raw(format, *) = RawExpression.create(format, *)
 
     # Static comparison forms, `Cypher.gt(a, b)` etc.
     def eq(left, right) = Expression.coerce(left).is_equal_to(right)

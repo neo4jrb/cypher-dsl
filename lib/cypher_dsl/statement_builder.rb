@@ -144,7 +144,8 @@ module CypherDSL
 
     # `call('db.labels').with_args(…).yield(…)` for a procedure, or
     # `call(statement, imports…)` for a `CALL { subquery }`.
-    def call(*arguments)
+    # The two overloads of the signature differ in their first argument; Steep cannot match that to a splat.
+    def call(*arguments) # steep:ignore DifferentMethodParameterKind
       # @type var arguments: untyped
       return StandaloneCall.new(arguments, builder: self) unless arguments.first.is_a?(Statement)
 

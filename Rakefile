@@ -16,8 +16,11 @@ task(:rbs) { sh 'bundle exec rbs -I sig validate' }
 desc 'Type check lib/ against sig/ with Steep'
 task(:steep) { sh 'bundle exec steep check' }
 
-desc 'All static checks: rubocop, reek, rbs, steep'
-task static: %i[rubocop reek rbs steep]
+# rbs and steep are MRI-only in the Gemfile (`platforms :ruby`), so JRuby runs the rest.
+TYPE_CHECKS = RUBY_ENGINE == 'jruby' ? [] : %i[rbs steep]
+
+desc 'All static checks: rubocop, reek, rbs, steep (rbs and steep on MRI only)'
+task static: %i[rubocop reek] + TYPE_CHECKS
 
 namespace :coverage do
   # Fail if any line added/modified since BASE (default origin/main) under lib/

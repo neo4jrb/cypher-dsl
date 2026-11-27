@@ -1,0 +1,12 @@
+module CypherDSL
+  # The constant conditions `true` and `false`.
+  class ConstantCondition < Condition
+    attr_reader value: bool
+
+    def initialize: (bool value) -> void
+
+    TRUE: ConstantCondition
+
+    FALSE: ConstantCondition
+  end
+end

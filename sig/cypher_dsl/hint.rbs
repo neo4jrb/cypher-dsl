@@ -1,0 +1,45 @@
+module CypherDSL
+  # A planner hint on a MATCH clause: `USING INDEX [SEEK] n:Label(prop, …)`,
+  # `USING SCAN n:Label` or `USING JOIN ON n, m`.
+  class Hint
+    # The kind of hint.
+    type hint_type = :index | :index_seek | :scan | :join
+
+    # What an index or scan hint refers to.
+    type container = Node | Relationship
+
+    @type: hint_type
+
+    @container: container?
+
+    @schema_name: String?
+
+    @property_names: Array[String | Expression]
+
+    @names: Array[SymbolicName]
+
+    attr_reader type: hint_type
+
+    attr_reader container: container?
+
+    # The single label or type of the container, for index and scan hints.
+    attr_reader schema_name: String?
+
+    attr_reader property_names: Array[String | Expression]
+
+    attr_reader names: Array[SymbolicName]
+
+    # `use_index_for(seek, *properties)`: all properties must belong to the same node or relationship.
+    def self.use_index_for: (bool seek, *Property | Array[Property] properties) -> Hint
+
+    def self.use_scan_for: (Node? node) -> Hint
+
+    def self.use_join_on: (*Node | Relationship | name_like | Array[Node | Relationship | name_like] nodes_or_names) -> Hint
+
+    # The container and its single label or type, validated for an index hint.
+    def self.index_reference: (Property property) -> [container, Node::label]
+
+    # `schema_name` is the single label or type of the container (a plain string; see `use_index_for`).
+    def initialize: (hint_type type, ?container: container?, ?schema_name: Node::label?, ?property_names: Array[String | Expression], ?names: Array[SymbolicName]) -> void
+  end
+end

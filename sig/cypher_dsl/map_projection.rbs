@@ -1,0 +1,35 @@
+module CypherDSL
+  # A map projection `n{.name, .age, total: count(x), .*}`.
+  #
+  # Entries follow the Java rules: a name followed by an expression is a
+  # `key: expression` pair, a lone name is a property lookup `.name`, an
+  # expression on its own is rendered as is, and `Cypher.asterisk` is `.*`.
+  class MapProjection
+    # A parsed entry: `.*`, `.name`, `.prop` (from a property), `key: expression`
+    # or a bare expression.
+    # The pair key is optional only because `SymbolicName#value` is; an alias is always resolved.
+    type entry = [:all] | [:lookup, String] | [:property, Property] | [:pair, String?, Expression] | [:expression, Expression]
+
+    # What callers hand in: names, expressions, or already parsed entries.
+    type raw_entry = String | Symbol | Expression | entry
+
+    include Expression
+
+    attr_reader subject: Expression
+
+    attr_reader entries: Array[entry]
+
+    def initialize: (Expression subject, Array[raw_entry] entries) -> void
+
+    def and: (*raw_entry | Array[raw_entry] more_entries) -> MapProjection
+
+    # Entries already parsed (arrays, from `and`) pass through untouched.
+    # untyped: the entries are `raw_entry`s; names and expressions are told apart at
+    # runtime by `name?`, which the type checker cannot follow.
+    def self.parse: (Array[untyped] raw_entries) -> Array[entry]
+
+    def self.parse_expression: (raw_entry entry) -> entry
+
+    def self.name?: (raw_entry entry) -> bool
+  end
+end

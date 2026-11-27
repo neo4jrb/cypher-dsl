@@ -1,0 +1,16 @@
+module CypherDSL
+  # Conditions joined by AND / OR / XOR, or negated with NOT. Rendered in
+  # parentheses; chaining the same operator flattens into one group and empty
+  # conditions drop out.
+  class CompoundCondition < Condition
+    attr_reader operator: String
+
+    attr_reader conditions: Array[Condition]
+
+    def self.create: (String operator, Condition left, Condition right) -> Condition
+
+    def initialize: (String operator, Array[Condition] conditions) -> void
+
+    def negation?: () -> bool
+  end
+end

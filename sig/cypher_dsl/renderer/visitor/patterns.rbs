@@ -1,0 +1,40 @@
+module CypherDSL
+  class Renderer
+    class Visitor
+      # Rendering of nodes, relationships, chains, named paths and quantified path patterns.
+      module Patterns : _VisitorInternals
+        @configuration: Configuration
+        @visited_names: Set[String]
+        @in_pattern_expression: bool?
+
+        # Shared with the visitor and the other mixins (private in Ruby, see _VisitorInternals).
+        def render_pattern_element: (pattern_element element) -> String
+
+        # A pattern used as a condition: known names render bare, unknown ones are dropped.
+        def render_pattern_expression: (pattern_element pattern) -> String
+
+        private
+
+        # `p = SHORTEST 1 pattern`, or `p = shortestPath(pattern)` on dialects before Neo4j 5.21.
+        def render_named_path: (NamedPath path) -> String
+
+        def render_quantified_path_pattern: (QuantifiedPathPattern quantified) -> String
+
+        def render_chain: (RelationshipChain chain) -> String
+
+        # A named node renders in full once per scope and as `(name)` afterwards.
+        def render_node: (Node node) -> String
+
+        # Like nodes, a named relationship renders in full once and as `[name]` afterwards.
+        def render_relationship_details: (Relationship relationship) -> String
+
+        # untyped: a `Relationship`; its `symbolic_name` is non-nil whenever the local `named`
+        # holds, which Steep cannot carry from the local back to the receiver.
+        def render_details_content: (untyped relationship) -> String
+
+        # `*`, `*min..max`, or nothing for a fixed-length relationship.
+        def render_length: (Relationship::Details details) -> String?
+      end
+    end
+  end
+end

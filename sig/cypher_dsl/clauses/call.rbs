@@ -1,0 +1,18 @@
+module CypherDSL
+  module Clauses
+    # An item of `YIELD`: a name, `name AS alias` or `*`.
+    type yield_item = SymbolicName | AliasedExpression | Asterisk
+
+    # `CALL name.parts(arguments) [YIELD items] [WHERE condition]`.
+    class Call < Data
+      attr_reader name_parts: Array[String]
+      attr_reader arguments: Array[Expression]
+      attr_reader yield_items: Array[yield_item]
+      attr_reader where: Condition?
+
+      def self.new: (name_parts: Array[String], arguments: Array[Expression], yield_items: Array[yield_item], where: Condition?) -> instance
+
+      def with: (?name_parts: Array[String], ?arguments: Array[Expression], ?yield_items: Array[yield_item], ?where: Condition?) -> instance
+    end
+  end
+end

@@ -21,7 +21,9 @@ module CypherDSL
 
     # Entries already parsed (arrays, from `and`) pass through untouched.
     def self.parse(raw_entries)
+      # @type var entries: Array[entry]
       entries = []
+      # @type var pending_key: String?
       pending_key = nil
       raw_entries.each do |entry|
         if pending_key

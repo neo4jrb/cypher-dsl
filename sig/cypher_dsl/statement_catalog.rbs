@@ -1,0 +1,45 @@
+module CypherDSL
+  # What a statement uses: its parameter names, the values of the parameters
+  # that carry one, and the expressions it hands back. Built from a rendering pass.
+  class StatementCatalog
+    # An expression a statement hands back that identifies something: a name or a property.
+    type identifiable_expression = SymbolicName | Property
+
+    # untyped: parameter values are whatever the caller bound, any Ruby object.
+    @parameters: Hash[String, untyped]
+
+    @parameter_names: Array[String]
+
+    @renamed_parameters: Hash[String, String]
+
+    @identifiable_expressions: Array[identifiable_expression]
+
+    # untyped: parameter values are whatever the caller bound, any Ruby object.
+    attr_reader parameters: Hash[String, untyped]
+
+    attr_reader parameter_names: Array[String]
+
+    attr_reader renamed_parameters: Hash[String, String]
+
+    attr_reader identifiable_expressions: Array[identifiable_expression]
+
+    # `uses` maps each parameter name to every value it was given, in render
+    # order, with {Parameter::NO_VALUE} for unbound uses.
+    # untyped: the values are the bound parameter values or `Parameter::NO_VALUE`.
+    def self.from_uses: (Hash[String, Array[untyped]] uses, ?Hash[String, String] renamed_parameters, ?statement: Statement?) -> StatementCatalog
+
+    # The expressions a statement hands back to its caller: the identifiable items of
+    # its final RETURN or WITH (names for aliased items and named entities, properties
+    # as they are), or the names a bare procedure call yields. Empty otherwise.
+    def self.identifiable_expressions_of: (Statement? statement) -> Array[identifiable_expression]
+
+    def self.result_items_of: (Clauses::clause? clause) -> Array[Expression]
+
+    # Only names, aliases, named entities and properties identify something; a literal does not.
+    def self.identifiable_expression: (Expression item) -> identifiable_expression?
+
+    # `renamed_parameters` maps original names to generated ones when the renderer rewrites them.
+    # untyped: see `parameters`.
+    def initialize: (parameters: Hash[String, untyped], parameter_names: Array[String], ?renamed_parameters: Hash[String, String], ?identifiable_expressions: Array[identifiable_expression]) -> void
+  end
+end

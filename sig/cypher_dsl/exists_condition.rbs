@@ -1,0 +1,13 @@
+module CypherDSL
+  # `EXISTS { pattern }` / `EXISTS { [WITH imports] statement }`.
+  class ExistsCondition < Condition
+    # A statement (subquery form), a single pattern or a list of patterns.
+    type body = Statement | pattern_element | Array[pattern_element]
+
+    attr_reader body: body
+
+    attr_reader imports: Array[Expression]
+
+    def initialize: (body body, ?Array[Expression] imports) -> void
+  end
+end

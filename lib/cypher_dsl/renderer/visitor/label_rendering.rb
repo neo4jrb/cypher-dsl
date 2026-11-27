@@ -52,7 +52,7 @@ module CypherDSL
             close = false if close && !labels.negated? && (current == :conjunction || parent == :disjunction)
           end
 
-          parts = []
+          parts = [] #: Array[String]
           parts << '!' if labels.negated?
           parts << '(' if close
           parts << render_labels_tree(labels.lhs, current) if labels.lhs

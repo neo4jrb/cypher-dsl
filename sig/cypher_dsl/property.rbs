@@ -1,0 +1,30 @@
+module CypherDSL
+  # A property lookup such as `n.name`, `n.address.city`, or the dynamic `n[$key]`.
+  # Names are strings; an expression as a name renders as an index lookup.
+  class Property
+    # What a property can be looked up by: a static name or an expression (`n[$key]`).
+    type name_like = String | Symbol | Expression
+
+    include Expression
+
+    attr_reader container: Expression
+
+    # Static names as strings, dynamic lookups as expressions.
+    attr_reader names: Array[String | Expression]
+
+    attr_reader external_reference: String?
+
+    def initialize: (Expression container, Array[name_like] names, ?external_reference: String?) -> void
+
+    def nested?: () -> bool
+
+    # The dotted name (`address.city`), or the external reference if one was given.
+    def name: () -> String
+
+    # The same property known under another name, e.g. the attribute it maps to.
+    def referenced_as: (String | Symbol reference) -> Property
+
+    # `n.prop = value`, for use in SET.
+    def to: (expression_like expression) -> Operation
+  end
+end

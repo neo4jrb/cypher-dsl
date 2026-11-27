@@ -1,0 +1,75 @@
+module CypherDSL
+  # A label expression as in `(n:A|B)`, `(n:(A|B)&!C)` or the dynamic `(n:$($labels))`.
+  # Built from {Labels.exactly}, {Labels.all} and {Labels.any} and combined with
+  # `and`, `or`, `negate`, `conjunction_with` (`:A:B`) and `disjunction_with`.
+  class Labels
+    # The kind of node: a leaf holding values, a colon list or a binary operator.
+    type kind = :leaf | :colon_conjunction | :colon_disjunction | :conjunction | :disjunction
+
+    @negated: bool
+
+    # A single entry: a static label name, or an expression resolving to labels
+    # matched with `$()` (all) or `$any()`.
+    class Value < Data
+      # `:static` for a label name, `:all` for `$()`, `:any` for `$any()`.
+      attr_reader modifier: :static | :all | :any
+
+      # The label name for `:static`, otherwise the expression.
+      attr_reader value: String | Expression
+
+      def self.new: (:static | :all | :any modifier, String | Expression value) -> instance
+                  | (modifier: :static | :all | :any, value: String | Expression) -> instance
+
+      def with: (?modifier: :static | :all | :any, ?value: String | Expression) -> instance
+    end
+
+    TYPES: Array[Symbol]
+
+    OPERATORS: Hash[Symbol, String]
+
+    UPDATE_MESSAGE: String
+
+    attr_reader type: kind
+
+    attr_reader values: Array[Value]
+
+    attr_reader lhs: Labels?
+
+    attr_reader rhs: Labels?
+
+    def self.exactly: (String | Symbol label) -> Labels
+
+    def self.all: (expression_like expression) -> Labels
+
+    def self.any: (expression_like expression) -> Labels
+
+    def initialize: (kind type, ?values: Array[Value], ?lhs: Labels?, ?rhs: Labels?, ?negated: bool) -> void
+
+    def negated?: () -> bool
+
+    def leaf?: () -> bool
+
+    def and: (Labels | String | Symbol other) -> Labels
+
+    def or: (Labels | String | Symbol other) -> Labels
+
+    def negate: () -> Labels
+
+    alias not negate
+
+    # `:A:B`, the form usable in SET and REMOVE.
+    def conjunction_with: (Labels | String | Symbol other) -> Labels
+
+    def disjunction_with: (Labels | String | Symbol other) -> Labels
+
+    # SET and REMOVE take a single dynamic expression or a colon list starting with one.
+    def usable_in_update?: () -> bool
+
+    # True when nothing would be rendered, e.g. `$([])`.
+    def empty?: () -> bool
+
+    private
+
+    def coerce: (Labels | String | Symbol other) -> Labels
+  end
+end

@@ -37,7 +37,7 @@ module CypherDSL
     end
 
     # The first plain label, lower-cased, or `n` for nodes without one.
-    def name_hint = labels.first.is_a?(String) ? labels.first.downcase : 'n'
+    def name_hint = labels.first.then { it.is_a?(String) ? it.downcase : 'n' }
     alias as_expression required_symbolic_name
 
     # `n.prop`; the property keeps this node as its container (index hints need the label),

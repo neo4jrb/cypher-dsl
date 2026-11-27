@@ -1,0 +1,15 @@
+module CypherDSL
+  # `ON CREATE SET …` / `ON MATCH SET …` attached to a MERGE.
+  class MergeAction < Data
+    # `:on_create` or `:on_match`.
+    attr_reader type: Symbol
+    attr_reader operations: Array[Clauses::operation]
+
+    def self.new: (type: Symbol, operations: Array[Clauses::operation]) -> instance
+
+    def with: (?type: Symbol, ?operations: Array[Clauses::operation]) -> instance
+
+    # `MergeAction.of(:on_create, set_clause)`; the type may also be given as `:ON_CREATE`.
+    def self.of: (String | Symbol `type`, Clauses::Set set_clause) -> MergeAction
+  end
+end

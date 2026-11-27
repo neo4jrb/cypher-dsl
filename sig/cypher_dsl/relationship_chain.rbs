@@ -1,0 +1,51 @@
+module CypherDSL
+  # A chain of relationships sharing nodes, `(a)-[]->(b)-[]->(c)`. Modifiers
+  # such as `named`, `min` or `properties` apply to the last relationship.
+  class RelationshipChain
+    @relationships: Array[Relationship]
+
+    attr_reader relationships: Array[Relationship]
+
+    def initialize: (Array[Relationship] relationships) -> void
+
+    def relationship_to: (Node other, *String | Symbol types) -> RelationshipChain
+
+    def relationship_from: (Node other, *String | Symbol types) -> RelationshipChain
+
+    def relationship_between: (Node other, *String | Symbol types) -> RelationshipChain
+
+    def named: (name_like name) -> RelationshipChain
+
+    # A hash, a `MapExpression` or alternating keys and values, as `MapExpression.of`.
+    def with_properties: (*MapExpression | Hash[String | Symbol, expression_like] | Symbol | expression_like keys_and_values) -> RelationshipChain
+
+    alias properties with_properties
+
+    def min: (Integer? minimum) -> RelationshipChain
+
+    def max: (Integer? maximum) -> RelationshipChain
+
+    def length: (Integer? minimum, Integer? maximum) -> RelationshipChain
+
+    def unbounded: () -> RelationshipChain
+
+    def where: (condition_like condition) -> RelationshipChain
+
+    def quantify_relationship: (QuantifiedPathPattern::Quantifier quantifier) -> RelationshipChain
+
+    # `((a)-[]->(b)-[]->(c)){1,3}`: a quantifier on the whole chain.
+    def quantify: (QuantifiedPathPattern::Quantifier quantifier) -> QuantifiedPathPattern
+
+    # The chain as a predicate.
+    def as_condition: () -> RelationshipPatternCondition
+
+    # The pattern as Cypher, names escaped only when necessary.
+    def to_s: () -> String
+
+    private
+
+    def add: (Relationship::direction direction, Node other, Array[String | Symbol] types) -> RelationshipChain
+
+    def update_last: () { (Relationship) -> Relationship } -> RelationshipChain
+  end
+end

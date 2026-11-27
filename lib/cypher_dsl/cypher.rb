@@ -104,6 +104,7 @@ module CypherDSL
     # A property gives the condition `n.prop IS NOT NULL` (`exists(n.prop)` on Neo4j 4), any other
     # plain expression the `exists(expr)` function.
     def exists(body, *imports)
+      # @type var body: untyped
       raise ArgumentError, 'The expression or pattern for exists() is required.' if body.nil?
       return PropertyExistsCondition.new(body) if body.is_a?(Property)
       return function('exists', body) if body.is_a?(Expression) && !body.is_a?(Statement) && !pattern?(body)
@@ -184,6 +185,7 @@ module CypherDSL
 
     # `size(list)` or `size(pattern)`.
     def size(expression_or_pattern)
+      # @type var expression_or_pattern: untyped
       argument = pattern?(expression_or_pattern) ? PatternExpression.new(expression_or_pattern) : expression_or_pattern
       function('size', argument)
     end
@@ -191,6 +193,7 @@ module CypherDSL
     # `count(expression)`, or `COUNT { [WITH imports] pattern }` / `COUNT { … statement }`
     # for patterns and statements.
     def count(expression_or_pattern, *imports)
+      # @type var expression_or_pattern: untyped
       subquery = pattern?(expression_or_pattern) || expression_or_pattern.is_a?(Statement) ||
                  expression_or_pattern.is_a?(UnionQuery)
       return FunctionInvocation.new('count', [Expression.coerce(expression_or_pattern)]) unless subquery
@@ -200,7 +203,9 @@ module CypherDSL
 
     # `Cypher.call('db.labels')` / `Cypher.call('db', 'labels')`: a procedure call (see {StandaloneCall});
     # `Cypher.call(statement, imports…)`: a `CALL { subquery }`.
-    def call(*arguments)
+    # The two overloads of the signature differ in their first argument; Steep cannot match that to a splat.
+    def call(*arguments) # steep:ignore DifferentMethodParameterKind
+      # @type var arguments: untyped
       return StatementBuilder.new.call(*arguments) if arguments.first.is_a?(Statement)
 
       StandaloneCall.new(arguments)
@@ -243,7 +248,7 @@ module CypherDSL
 
     # Verbatim Cypher, the escape hatch; `$E` placeholders take the arguments in
     # order, `\$E` is a literal `$E`. See {RawExpression.create}.
-    def raw(*) = RawExpression.create(*)
+    def raw(format, *) = RawExpression.create(format, *)
 
     # Static comparison forms, `Cypher.gt(a, b)` etc.
     def eq(left, right) = Expression.coerce(left).is_equal_to(right)

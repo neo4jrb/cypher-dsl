@@ -1,0 +1,35 @@
+module CypherDSL
+  # Turns a {Statement} into Cypher text according to a {Renderer::Configuration}.
+  class Renderer
+    # What {#render_fragment} accepts: an expression, a pattern, a clause, a statement or a {Search}.
+    type fragment = Expression | SortItem | LabelOperation | pattern_element | Clauses::clause | Statement | Search
+
+    self.@default: Renderer?
+
+    # The default configuration without forced escaping; used by `to_s` on expressions and patterns.
+    self.@plain: Renderer?
+
+    @configuration: Configuration
+
+    def self.default: () -> Renderer
+
+    # The default configuration without forced escaping; used by `to_s` on expressions and patterns.
+    def self.plain: () -> Renderer
+
+    # Mirrors `Renderer.getRenderer(configuration)`.
+    def self.get_renderer: (Configuration configuration) -> Renderer
+
+    attr_reader configuration: Configuration
+
+    def initialize: (Configuration configuration) -> void
+
+    def render: (Statement statement) -> String
+
+    # Renders a part of a statement on its own: an expression, a pattern, a clause or a {Search}.
+    def render_fragment: (fragment fragment) -> String
+
+    # The statement's parameters and identifiable expressions as a {StatementCatalog};
+    # raises {ConflictingParametersException} when a name is bound inconsistently.
+    def catalog: (Statement statement) -> StatementCatalog
+  end
+end

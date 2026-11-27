@@ -1,0 +1,28 @@
+module CypherDSL
+  # `vector([1, 2, 3], 3, INTEGER NOT NULL)`: a typed vector literal. The Java
+  # overloads per primitive array become an optional type: `:integer8`,
+  # `:integer16`, `:integer32`, `:integer` (default for integers), `:float32`
+  # and `:float` (default for floats).
+  class VectorLiteral
+    include Expression
+
+    # Vector type symbols and their Cypher spelling.
+    TYPES: Hash[Symbol, String]
+
+    FLOAT_TYPES: Array[Symbol]
+
+    MAX_SIZE: Integer
+
+    # The elements, all integers or all floats depending on the type.
+    attr_reader content: Array[Integer] | Array[Float]
+
+    attr_reader type: Symbol
+
+    def self.of: (Array[Integer | Float] elements, ?Symbol? type) -> VectorLiteral
+
+    def initialize: (Array[Integer | Float] content, Symbol type) -> void
+
+    # The literal as Cypher text; it does not depend on any rendering option.
+    def as_string: () -> String
+  end
+end

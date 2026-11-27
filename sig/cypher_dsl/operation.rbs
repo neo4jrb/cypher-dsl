@@ -1,0 +1,19 @@
+module CypherDSL
+  # A binary operation such as `n.x = true` or `a + b`.
+  class Operation
+    include Expression
+
+    attr_reader left: Expression
+
+    attr_reader operator: String
+
+    attr_reader right: Expression
+
+    ASSIGNMENTS: Array[String]
+
+    def initialize: (Expression left, String operator, Expression right) -> void
+
+    # Assignments (`n.p = x`) render bare; arithmetic renders in parentheses.
+    def assignment?: () -> bool
+  end
+end

@@ -1,0 +1,35 @@
+# RBS collection: third-party signatures for `rbs validate` and `steep check`.
+# `bundle exec rbs collection install` resolves them into .gem_rbs_collection/
+# (git-ignored) from the lock file next to this one.
+sources:
+  - type: git
+    name: ruby/gem_rbs_collection
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    revision: main
+    repo_dir: gems
+
+path: .gem_rbs_collection
+
+gems:
+  # Standard library signatures the lib relies on (literals hold dates and times).
+  - name: date
+  - name: time
+  # Development tooling is not type checked; keep their signatures out.
+  - name: rake
+    ignore: true
+  - name: rspec
+    ignore: true
+  - name: rubocop
+    ignore: true
+  - name: rubocop-performance
+    ignore: true
+  - name: rubocop-rspec
+    ignore: true
+  - name: reek
+    ignore: true
+  - name: simplecov
+    ignore: true
+  - name: rbs
+    ignore: true
+  - name: steep
+    ignore: true

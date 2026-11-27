@@ -1,0 +1,45 @@
+module CypherDSL
+  # `reduce(accumulator = initial, variable IN list | mapper)`, built step by
+  # step: `Cypher.reduce(:n).in(list).map(acc.add(n)).accumulate_on(acc).with_initial_value_of(0)`.
+  class Reduction
+    include Expression
+
+    attr_reader variable: SymbolicName
+
+    attr_reader list: Expression
+
+    attr_reader mapper: Expression
+
+    attr_reader accumulator: Expression
+
+    attr_reader initial_value: Expression
+
+    def self.of: (name_like variable) -> Ongoing
+
+    def initialize: (variable: SymbolicName, list: Expression, mapper: Expression, accumulator: Expression, initial_value: Expression) -> void
+
+    # The intermediate states; `with_initial_value_of` completes the reduction.
+    class Ongoing < Data
+      attr_reader variable: SymbolicName
+
+      attr_reader list: Expression?
+
+      attr_reader mapper: Expression?
+
+      attr_reader accumulator: Expression?
+
+      def self.new: (variable: SymbolicName, list: Expression?, mapper: Expression?, accumulator: Expression?) -> instance
+                  | (SymbolicName variable, Expression? list, Expression? mapper, Expression? accumulator) -> instance
+
+      def with: (?variable: SymbolicName, ?list: Expression?, ?mapper: Expression?, ?accumulator: Expression?) -> instance
+
+      def in: (expression_like list) -> Ongoing
+
+      def map: (expression_like mapper) -> Ongoing
+
+      def accumulate_on: (expression_like accumulator) -> Ongoing
+
+      def with_initial_value_of: (expression_like initial_value) -> Reduction
+    end
+  end
+end

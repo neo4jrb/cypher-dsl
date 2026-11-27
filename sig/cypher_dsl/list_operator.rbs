@@ -1,0 +1,24 @@
+module CypherDSL
+  # Index and slice access on lists: `list[0]`, `list[1..3]`, `list[..2]`.
+  class ListOperator
+    # An index or bound: a number or an expression yielding one.
+    type index = Expression | Numeric
+
+    include Expression
+
+    attr_reader list: Expression
+
+    attr_reader start_index: Expression?
+
+    attr_reader end_index: Expression?
+
+    # True for `list[from..to]`, false for `list[index]`.
+    attr_reader slice: bool
+
+    def self.value_at: (Expression list, index index) -> ListOperator
+
+    def self.sublist: (Expression list, ?index? start_index, ?index? end_index) -> ListOperator
+
+    def initialize: (Expression list, Expression? start_index, Expression? end_index, bool slice) -> void
+  end
+end

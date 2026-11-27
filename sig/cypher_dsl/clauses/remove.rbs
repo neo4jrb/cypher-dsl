@@ -1,0 +1,15 @@
+module CypherDSL
+  module Clauses
+    # An item of REMOVE: a property, a label operation or a raw fragment.
+    type remove_item = Property | LabelOperation | RawExpression
+
+    # `REMOVE n.prop, n:Label`.
+    class Remove < Data
+      attr_reader items: Array[remove_item]
+
+      def self.new: (items: Array[remove_item]) -> instance
+
+      def with: (?items: Array[remove_item]) -> instance
+    end
+  end
+end

@@ -1,0 +1,24 @@
+module CypherDSL
+  class Renderer
+    # Backtick escaping of schema names and identifiers, following the upstream
+    # rules: the text ``` stands for a backtick, doubled backticks are
+    # collapsed first, then every backtick is doubled and the name wrapped.
+    module Escaper
+      IDENTIFIER: Regexp
+
+      # Parameter names may be dotted (`$point.distance`) without escaping.
+      PARAMETER_NAME: Regexp
+
+      UNICODE_BACKTICK: String
+
+      # Always escapes.
+      def self?.escape: (String name) -> String
+
+      # Escapes only names that are not plain identifiers; `nil` stays `nil`.
+      def self?.escape_if_necessary: (String name) -> String
+                                   | (nil name) -> nil
+
+      def self?.escape_parameter_name: (String name) -> String
+    end
+  end
+end

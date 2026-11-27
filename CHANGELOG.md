@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- RBS type signatures for the whole library in `sig/`, shipped with the gem and checked
+  against `lib/` with Steep in CI.
+
 ## [0.1.0] - 2026-11-09
 
 First stable release. The public API is the one activegraph builds on; from here on,

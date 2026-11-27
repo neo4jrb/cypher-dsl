@@ -1,0 +1,41 @@
+module CypherDSL
+  class Renderer
+    # Resolves symbolic names, aliases and parameter names while rendering.
+    # The base strategy keeps the given names and invents `hint001`-style names
+    # for elements that were referenced without ever being named.
+    class NameResolver
+      # What a scope imports or exports: the identifiables (names, aliased expressions,
+      # named nodes and relationships) handed across, or `:all` for the whole scope.
+      type scope_items = :all | Array[Expression]
+
+      # Generated names for unresolved symbolic names, compared by identity.
+      @context_names: Hash[SymbolicName, String]
+
+      def initialize: () -> void
+
+      # The rendered name of a symbolic name; `in_entity` is true inside a node or relationship pattern.
+      def resolve: (SymbolicName symbolic_name, ?in_entity: bool) -> String
+
+      # The rendered name of an alias; `define` when the alias is being introduced (`expr AS alias`),
+      # `in_last_return` inside the final RETURN of the statement.
+      def resolve_alias: (AliasedExpression aliased, ?define: bool, ?in_last_return: bool) -> String
+
+      # The rendered name of a named parameter.
+      # untyped: a `Parameter` whose `name` is a `String` because it is not `anonymous?`; the
+      # renderer only hands named parameters to the resolver, which Steep cannot derive.
+      def resolve_parameter: (untyped parameter) -> String
+
+      # Enters a subquery scope that sees `imports` of the current one.
+      def enter_scope: (scope_items imports) -> void
+
+      # Leaves the current scope, handing `exports` back to the outer one.
+      def leave_scope: (scope_items exports) -> void
+
+      private
+
+      # untyped: a `SymbolicName`; its `value` is a `String` whenever `resolved?` holds, which Steep
+      # cannot derive from the predicate.
+      def context_name: (untyped symbolic_name) -> String
+    end
+  end
+end

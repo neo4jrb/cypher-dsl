@@ -1,0 +1,31 @@
+module CypherDSL
+  # The list predicates `all(x IN list WHERE condition)`, `any(…)`, `none(…)`, `single(…)`.
+  # Built with `Cypher.all(:x).in(list).where(condition)` (or `any`, `none`, `single`).
+  class ListPredicate < Condition
+    # `all`, `any`, `none` or `single`.
+    attr_reader predicate: String
+
+    attr_reader variable: SymbolicName
+
+    attr_reader list: Expression
+
+    attr_reader condition: Condition
+
+    def initialize: (String predicate, name_like variable, Expression list, Condition condition) -> void
+
+    # `Cypher.all(:x)`: waiting for `in(list)` and then `where(condition)`.
+    class Ongoing
+      @predicate: String
+
+      @variable: name_like
+
+      @list: Expression?
+
+      def initialize: (String predicate, name_like variable, ?Expression? list) -> void
+
+      def in: (expression_like list) -> Ongoing
+
+      def where: (condition_like condition) -> ListPredicate
+    end
+  end
+end

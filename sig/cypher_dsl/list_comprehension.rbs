@@ -1,0 +1,30 @@
+module CypherDSL
+  # `[variable IN list WHERE condition | expression]`. Built with
+  # `Cypher.list_with(name).in(list)`, refined with `where`, completed with `returning`.
+  class ListComprehension
+    include Expression
+
+    attr_reader variable: SymbolicName
+
+    attr_reader list: Expression?
+
+    attr_reader where_condition: Condition?
+
+    attr_reader projection: Expression?
+
+    def initialize: (name_like variable, ?list: Expression?, ?where_condition: Condition?, ?projection: Expression?) -> void
+
+    def in: (expression_like list) -> ListComprehension
+
+    def where: (condition_like condition) -> ListComprehension
+
+    # Without an argument the comprehension yields the variable itself; several
+    # expressions yield a list.
+    def returning: (*expression_like expressions) -> ListComprehension
+
+    private
+
+    # untyped: `changes` is any subset of the keyword arguments of `initialize`.
+    def with: (**untyped changes) -> ListComprehension
+  end
+end

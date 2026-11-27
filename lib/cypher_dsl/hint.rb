@@ -62,7 +62,7 @@ module CypherDSL
     def initialize(type, container: nil, schema_name: nil, property_names: [], names: [])
       @type = type
       @container = container
-      @schema_name = schema_name
+      @schema_name = schema_name #: String?
       @property_names = property_names.freeze
       @names = names.freeze
       freeze

@@ -1,0 +1,12 @@
+module CypherDSL
+  # `expression AS alias`.
+  class AliasedExpression
+    include Expression
+
+    attr_reader delegate: Expression
+
+    attr_reader alias_name: SymbolicName
+
+    def initialize: (Expression delegate, name_like alias_name) -> void
+  end
+end

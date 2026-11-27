@@ -1,0 +1,19 @@
+module CypherDSL
+  # A map literal such as `{name: 'Alice', age: $age}`. Keys are strings,
+  # values are expressions.
+  class MapExpression
+    include Expression
+
+    attr_reader entries: Array[[String, Expression]]
+
+    # Accepts a single Hash or alternating keys and values, as `Cypher.map_of` does.
+    # untyped: either one `MapExpression`, one `Hash[String | Symbol, expression_like]`, or
+    # alternating `String | Symbol` keys and `expression_like` values; a rest parameter
+    # cannot express that shape.
+    def self.of: (*untyped keys_and_values) -> MapExpression
+
+    def initialize: (Array[[String, Expression]] entries) -> void
+
+    def empty?: () -> bool
+  end
+end

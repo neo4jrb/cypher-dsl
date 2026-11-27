@@ -1,0 +1,13 @@
+module CypherDSL
+  module Clauses
+    # `MERGE pattern [ON CREATE SET …] [ON MATCH SET …]`; actions keep call order.
+    class Merge < Data
+      attr_reader pattern_elements: Array[pattern_element]
+      attr_reader actions: Array[MergeAction]
+
+      def self.new: (pattern_elements: Array[pattern_element], actions: Array[MergeAction]) -> instance
+
+      def with: (?pattern_elements: Array[pattern_element], ?actions: Array[MergeAction]) -> instance
+    end
+  end
+end

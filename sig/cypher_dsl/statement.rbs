@@ -1,0 +1,59 @@
+module CypherDSL
+  # A built, immutable statement: an ordered list of clauses. Rendering with the
+  # default renderer is memoised, as in the Java `Statement#getCypher`.
+  class Statement
+    @clauses: Array[Clauses::clause]
+
+    @prefix: String?
+
+    @cypher: String?
+
+    @catalog: StatementCatalog?
+
+    attr_reader clauses: Array[Clauses::clause]
+
+    # `EXPLAIN` or `PROFILE`, if any.
+    attr_reader prefix: String?
+
+    # An empty builder, as `Statement.builder()` in Java.
+    def self.builder: () -> StatementBuilder
+
+    # A statement from a list of clause objects, as `Statement.of(clauses)` in Java.
+    def self.of: (Array[Clauses::clause] clauses) -> Statement
+
+    # `prefix` is `EXPLAIN` or `PROFILE` for the corresponding statement kinds.
+    def initialize: (Array[Clauses::clause] clauses, ?prefix: String?) -> void
+
+    def cypher: () -> String
+
+    # The same statement with `EXPLAIN` / `PROFILE` in front.
+    def explain: () -> Statement
+
+    def profile: () -> Statement
+
+    # Parameter names and bound values; raises {ConflictingParametersException}
+    # when a name is bound inconsistently. Memoised, like `cypher`.
+    def catalog: () -> StatementCatalog
+
+    # `name => value` for every parameter that carries a value.
+    # untyped: parameter values are whatever the caller bound, any Ruby object.
+    def parameters: () -> Hash[String, untyped]
+
+    # Every parameter name used, bound or not.
+    def parameter_names: () -> Array[String]
+
+    # True when the statement produces rows: it ends with RETURN, or is a
+    # procedure call with YIELD.
+    def result_statement?: () -> bool
+
+    # True when the statement is a bare procedure call, with or without YIELD.
+    def procedure_call?: () -> bool
+
+    # True when the statement contains no WITH, i.e. has a single query part.
+    def single_query?: () -> bool
+
+    def multi_part_query?: () -> bool
+
+    def to_s: () -> String
+  end
+end

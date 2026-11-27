@@ -38,6 +38,33 @@ line-by-line port. The reference source is a full clone of the Java project at
 - Runtime dependency is Zeitwerk only. No ActiveSupport.
 - Zeitwerk one-class-per-file; constant `CypherDSL` is an inflection.
 
+## Static checks
+
+Every PR runs, each as its own GitHub workflow: `rspec` (3.4, latest MRI,
+JRuby) plus a `diff-coverage` gate, `rubocop` (with rubocop-performance and
+rubocop-rspec), `reek` against the `.reek.yml` baseline, and `rbs validate` +
+`steep check` of `lib/` against `sig/`. Locally: `bundle exec rake static`, or
+`bundle exec rake` for specs and checks together.
+
+- RuboCop and Reek are pinned at the patch level in the Gemfile; bumping them
+  may add cops or detectors, so bump deliberately and refresh the baseline.
+- Reek's `.reek.yml` grandfathers the smells that existed when it was
+  introduced. New code must not add smells; shrink the file, never grow it
+  (`bundle exec reek --todo lib` regenerates it after a cleanup).
+- `sig/` mirrors `lib/`, one `.rbs` per `.rb`, and is shipped in the gem. Every
+  new or changed public method needs its signature updated; Steep runs in
+  strict mode, so `untyped` needs a `# untyped: <reason>` comment. Third-party
+  signatures come from `rbs_collection.yaml` (`bundle exec rbs collection
+  install`, lock file committed, install dir git-ignored); `sig/manifest.yaml`
+  declares the stdlib signatures the shipped `sig/` needs.
+- `typecheck/usage.rb` is a Steep target of public API calls that must type
+  check. Signatures must accept everything the method accepts at runtime;
+  prefer overloads over unions so the result type stays specific, and add the
+  call that exposed a too-narrow signature to that file.
+- Coverage: `COVERAGE=1 bundle exec rspec` (MRI only) writes
+  `coverage/.resultset.json`; `rake coverage:enforce` fails on any executable
+  line added or changed under `lib/` vs `origin/main` that no test hit.
+
 ## Commits and releases
 
 - Conventional Commits for every commit and PR title; PRs are squash-merged.

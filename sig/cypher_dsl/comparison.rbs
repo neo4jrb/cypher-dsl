@@ -1,0 +1,20 @@
+module CypherDSL
+  # A binary comparison (`a = b`, `a =~ b`, …) or a unary one (`a IS NULL`).
+  class Comparison < Condition
+    UNARY_OPERATORS: Array[String]
+
+    attr_reader left: Expression
+
+    attr_reader operator: String
+
+    # `nil` for the unary operators `IS NULL` and `IS NOT NULL`.
+    attr_reader right: Expression?
+
+    def initialize: (Expression left, String operator, Expression? right) -> void
+
+    def unary?: () -> bool
+
+    # Negating a null check flips it instead of wrapping it in NOT.
+    def not: () -> Condition
+  end
+end

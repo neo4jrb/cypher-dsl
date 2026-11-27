@@ -15,7 +15,7 @@ module CypherDSL
                                  .sort
 
     def expected_function_name(method)
-      words = method.to_s.sub(/_distinct\z/, '').split('_')
+      words = method.to_s.delete_suffix('_distinct').split('_')
       camel = words.first + words.drop(1).map(&:capitalize).join
       camel.start_with?('graph') ? "graph.#{camel[5].downcase}#{camel[6..]}" : camel
     end

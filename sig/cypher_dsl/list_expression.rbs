@@ -1,0 +1,13 @@
+module CypherDSL
+  # A list literal `[a, b, c]` of expressions.
+  class ListExpression
+    include Expression
+
+    attr_reader elements: Array[Expression]
+
+    # Elements are coerced; nested arrays are flattened into the list.
+    def self.of: (*expression_like elements) -> ListExpression
+
+    def initialize: (Array[Expression] elements) -> void
+  end
+end

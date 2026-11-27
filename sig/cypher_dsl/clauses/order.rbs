@@ -1,0 +1,12 @@
+module CypherDSL
+  module Clauses
+    # `ORDER BY item, …`; attached to RETURN or WITH.
+    class Order < Data
+      attr_reader items: Array[SortItem]
+
+      def self.new: (items: Array[SortItem]) -> instance
+
+      def with: (?items: Array[SortItem]) -> instance
+    end
+  end
+end

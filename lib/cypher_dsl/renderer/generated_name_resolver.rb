@@ -18,8 +18,8 @@ module CypherDSL
 
       # `imports` are the identifiables visible inside the new scope, or `:all`.
       def enter_scope(imports)
-        outer = @lookups.last
-        lookup = {}
+        outer = @lookups.last #: Hash[lookup_key, String]
+        lookup = {} #: Hash[lookup_key, String]
         used = Set.new
         if outer
           lookup = imports == :all ? outer.dup : imports.to_h { |import| [key_of(import), outer[key_of(import)]] }
@@ -34,9 +34,9 @@ module CypherDSL
       # `exports` are the identifiables the scope returns to its outer scope, or `:all`.
       def leave_scope(exports)
         @counters.pop
-        inner = @lookups.pop
+        inner = @lookups.pop #: Hash[lookup_key, String]
         @used.pop
-        outer = @lookups.last
+        outer = @lookups.last #: Hash[lookup_key, String]
         if exports == :all
           outer.merge!(inner)
         else

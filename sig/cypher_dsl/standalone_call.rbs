@@ -1,0 +1,47 @@
+module CypherDSL
+  # `Cypher.call('db.labels')`: a procedure call being built. `with_args` adds
+  # arguments, `yield` selects outputs and continues as a statement builder,
+  # `build` finishes a bare call, `as_function` turns it into a function
+  # invocation instead.
+  class StandaloneCall
+    # A name part as given to `Cypher.call`: a string or symbol, possibly dotted, or a list of them.
+    type name_part = String | Symbol | Array[String | Symbol]
+
+    # What `yield` accepts: names, aliased expressions or the asterisk, possibly in lists.
+    type yield_item_like = String | Symbol | Clauses::yield_item | Array[String | Symbol | Clauses::yield_item]
+
+    @name_parts: Array[String]
+
+    @arguments: Array[Expression]
+
+    @builder: StatementBuilder?
+
+    attr_reader name_parts: Array[String]
+
+    attr_reader arguments: Array[Expression]
+
+    # `name_parts` as given to `Cypher.call`: strings, symbols or arrays, dotted names split.
+    def initialize: (Array[name_part] name_parts, ?arguments: Array[Expression], ?builder: StatementBuilder?) -> void
+
+    def procedure_name: () -> String
+
+    def with_args: (*expression_like expressions) -> StandaloneCall
+
+    # `YIELD item, item AS alias, …`; continues as a statement builder.
+    def yield: (*yield_item_like items) -> StatementBuilder
+
+    def build: () -> Statement
+
+    # The call without YIELD, continuing as a statement builder (for `VOID` procedures).
+    def without_results: () -> StatementBuilder
+
+    # The procedure as a function invocation; `distinct` only for aggregates.
+    def as_function: (?bool distinct) -> FunctionInvocation
+
+    private
+
+    def clause: (Array[Clauses::yield_item] yield_items) -> Clauses::Call
+
+    def yield_item: (String | Symbol | Clauses::yield_item item) -> Clauses::yield_item
+  end
+end

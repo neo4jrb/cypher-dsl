@@ -1,0 +1,16 @@
+module CypherDSL
+  module Clauses
+    # `CALL (imports) { body } [IN TRANSACTIONS [OF n ROWS]]`; the body is a
+    # statement or a raw Cypher fragment, `imports` a list of names or the asterisk.
+    class CallSubquery < Data
+      attr_reader body: Statement | RawExpression
+      attr_reader imports: Array[Expression]
+      attr_reader in_transactions: bool
+      attr_reader rows: Integer?
+
+      def self.new: (body: Statement | RawExpression, imports: Array[Expression], in_transactions: bool, rows: Integer?) -> instance
+
+      def with: (?body: Statement | RawExpression, ?imports: Array[Expression], ?in_transactions: bool, ?rows: Integer?) -> instance
+    end
+  end
+end

@@ -22,7 +22,8 @@ Gem::Specification.new do |spec|
     'rubygems_mfa_required' => 'true'
   }
 
-  spec.files = Dir['lib/**/*.rb', 'README.md', 'CHANGELOG.md', 'LICENSE.txt', 'NOTICE']
+  spec.files = Dir['lib/**/*.rb', 'sig/**/*.rbs', 'sig/manifest.yaml',
+                   'README.md', 'CHANGELOG.md', 'LICENSE.txt', 'NOTICE']
   spec.require_paths = ['lib']
 
   spec.add_dependency 'zeitwerk', '~> 2.6'

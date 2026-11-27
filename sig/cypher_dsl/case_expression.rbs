@@ -1,0 +1,34 @@
+module CypherDSL
+  # `CASE [subject] WHEN condition THEN value … [ELSE default] END`.
+  # Built with `Cypher.case_expression`, `.when(…).then(…)` pairs and `else_default`.
+  class CaseExpression
+    include Expression
+
+    attr_reader subject: Expression?
+
+    # `[condition, value]` pairs in order.
+    attr_reader whens: Array[[Expression, Expression]]
+
+    attr_reader default: Expression?
+
+    def initialize: (?subject: Expression?, ?whens: Array[[Expression, Expression]], ?default: Expression?) -> void
+
+    def when: (expression_like condition) -> OngoingWhen
+
+    def else_default: (expression_like default_value) -> CaseExpression
+
+    # untyped: `changes` is any subset of the keyword arguments of `initialize`.
+    def with: (**untyped changes) -> CaseExpression
+
+    # A `WHEN` waiting for its `THEN`.
+    class OngoingWhen
+      @case_expression: CaseExpression
+
+      @condition: Expression
+
+      def initialize: (CaseExpression case_expression, Expression condition) -> void
+
+      def then: (expression_like value) -> CaseExpression
+    end
+  end
+end

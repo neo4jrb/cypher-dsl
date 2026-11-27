@@ -1,0 +1,62 @@
+module CypherDSL
+  # A named path `p = (a)-[]->(b)`, optionally with a path selector such as
+  # `p = ANY SHORTEST …`. Usable as a pattern element in MATCH and as an
+  # expression (`p`) afterwards. Built with `Cypher.path(:p).defined_by(pattern)`
+  # or `Cypher.any_shortest.named(:p).defined_by(pattern)`.
+  class NamedPath
+    # What a path can be defined by (see `Cypher.pattern?`).
+    type path_pattern = Relationship | RelationshipChain | QuantifiedPathPattern
+
+    @symbolic_name: SymbolicName
+
+    @pattern: path_pattern
+
+    @selector: Selector?
+
+    include Expression
+
+    attr_reader symbolic_name: SymbolicName
+
+    attr_reader pattern: path_pattern
+
+    attr_reader selector: Selector?
+
+    def initialize: (SymbolicName symbolic_name, path_pattern pattern, ?selector: Selector?) -> void
+
+    alias required_symbolic_name symbolic_name
+
+    alias as_expression symbolic_name
+
+    # `Cypher.path(:p)`: waiting for `defined_by`, or `get` for a bare reference to the name.
+    class Ongoing
+      @symbolic_name: SymbolicName
+
+      @selector: Selector?
+
+      def initialize: (SymbolicName symbolic_name, ?selector: Selector?) -> void
+
+      # Defining a path by another named path reuses that path.
+      def defined_by: (path_pattern | NamedPath pattern) -> NamedPath
+
+      def get: () -> SymbolicName
+    end
+
+    # `Cypher.any_shortest` and friends: a path selector waiting for `named`.
+    class Selector
+      @keyword: String
+
+      @legacy_function: String?
+
+      attr_reader keyword: String
+
+      # `legacy_function` is the pre-5.21 spelling (`shortestPath`, `allShortestPaths`), if any.
+      attr_reader legacy_function: String?
+
+      def self.shortest_k: (Integer count, ?groups: bool) -> Selector
+
+      def initialize: (String keyword, ?legacy_function: String?) -> void
+
+      def named: (name_like name) -> Ongoing
+    end
+  end
+end

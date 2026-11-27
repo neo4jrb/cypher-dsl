@@ -1,0 +1,91 @@
+module CypherDSL
+  # A node pattern `(name:Label {props} WHERE condition)`. Used as an expression
+  # it stands for its symbolic name.
+  #
+  # Nodes are value objects; the one piece of lazily computed state is the
+  # generated name an unnamed node receives when something references it, as
+  # in the Java `getRequiredSymbolicName`.
+  class Node
+    # A label is a plain string or a label expression (`Labels`).
+    type label = String | Labels
+
+    @labels: Array[label]
+
+    @symbolic_name: SymbolicName?
+
+    @properties: MapExpression?
+
+    @where_condition: Condition?
+
+    include Expression
+
+    attr_reader labels: Array[label]
+
+    attr_reader properties: MapExpression?
+
+    attr_reader where_condition: Condition?
+
+    # The explicit name, or the generated one once {#required_symbolic_name} was called.
+    attr_reader symbolic_name: SymbolicName?
+
+    def initialize: (labels: Array[label], ?symbolic_name: SymbolicName?, ?properties: MapExpression?, ?where_condition: Condition?) -> void
+
+    def named: (name_like name) -> Node
+
+    # A hash, a `MapExpression` or alternating keys and values, as `MapExpression.of`.
+    def with_properties: (*MapExpression | Hash[String | Symbol, expression_like] | Symbol | expression_like keys_and_values) -> Node
+
+    # The inline predicate `(n WHERE condition)`.
+    def where: (condition_like condition) -> Node
+
+    def named?: () -> bool
+
+    # The name of this node, generating one if it has none (and keeping it, as in Java).
+    def required_symbolic_name: () -> SymbolicName
+
+    # The first plain label, lower-cased, or `n` for nodes without one.
+    def name_hint: () -> String
+
+    alias as_expression required_symbolic_name
+
+    # `n.prop`; the property keeps this node as its container (index hints need the label),
+    # the name is settled now so generated names keep their order.
+    def property: (*String | Symbol | Expression names) -> Property
+
+    # The condition `n:Label`, checking the node for the given labels.
+    def has_labels: (*label | Symbol labels) -> HasLabelCondition
+
+    # `n += {…}` and `n = {…}`, for use in SET; the node must be named.
+    def mutate: (expression_like expression) -> Operation
+
+    def set: (expression_like expression) -> Operation
+
+    # The map projection `n{…}`, built on the (possibly generated) name.
+    def project: (*String | Symbol | Expression | Array[String | Symbol | Expression] entries) -> MapProjection
+
+    # `id(n)`; deprecated in Neo4j 5 in favour of {#element_id}, kept for parity.
+    def internal_id: () -> FunctionInvocation
+
+    # `labels(n)`.
+    def labels_function: () -> FunctionInvocation
+
+    # `elementId(n)`.
+    def element_id: () -> FunctionInvocation
+
+    def relationship_to: (Node other, *String | Symbol types) -> Relationship
+
+    def relationship_from: (Node other, *String | Symbol types) -> Relationship
+
+    def relationship_between: (Node other, *String | Symbol types) -> Relationship
+
+    # `relationship_with(other, Relationship::Direction::LTR, 'TYPE')`: the direction as a value.
+    def relationship_with: (Node other, Relationship::direction direction, *String | Symbol types) -> Relationship
+
+    private
+
+    def named_for_update: () -> self
+
+    # untyped: a `**changes` splat forwarded to `Node.new`; the keys are the keyword arguments of `initialize`.
+    def with: (**untyped changes) -> Node
+  end
+end

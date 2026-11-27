@@ -1,0 +1,12 @@
+module CypherDSL
+  module Clauses
+    # `CREATE pattern, …`.
+    class Create < Data
+      attr_reader pattern_elements: Array[pattern_element]
+
+      def self.new: (pattern_elements: Array[pattern_element]) -> instance
+
+      def with: (?pattern_elements: Array[pattern_element]) -> instance
+    end
+  end
+end

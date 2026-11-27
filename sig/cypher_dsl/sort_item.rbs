@@ -1,0 +1,15 @@
+module CypherDSL
+  # One item of an ORDER BY: an expression with an optional direction.
+  class SortItem
+    attr_reader expression: Expression
+
+    # `:asc`, `:desc` or `nil` for no explicit direction.
+    attr_reader direction: Symbol?
+
+    def initialize: (Expression expression, Symbol? direction) -> void
+
+    def ascending: () -> SortItem
+
+    def descending: () -> SortItem
+  end
+end

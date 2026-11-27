@@ -1,0 +1,12 @@
+module CypherDSL
+  module Clauses
+    # Items rendered without the RETURN keyword, for raw fragments that carry their own.
+    class RawReturn < Data
+      attr_reader items: Array[Expression]
+
+      def self.new: (items: Array[Expression]) -> instance
+
+      def with: (?items: Array[Expression]) -> instance
+    end
+  end
+end

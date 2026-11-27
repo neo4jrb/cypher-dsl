@@ -1,0 +1,323 @@
+# Reek baseline. Like a .rubocop_todo.yml: the `detectors:` exclude lists below
+# grandfather the smells that existed when reek was introduced, so CI is green
+# on current code and fails only on NEW smells. Regenerate after cleanup with
+# `bundle exec reek --todo lib` (shrink it over time; don't let it grow).
+---
+detectors:
+  BooleanParameter:
+    exclude:
+    - CypherDSL::Cypher#load_csv
+    - CypherDSL::FunctionInvocation#initialize
+    - CypherDSL::LabelOperation#initialize
+    - CypherDSL::Labels#initialize
+    - CypherDSL::NamedPath::Selector#self.shortest_k
+    - CypherDSL::Renderer::Configuration#initialize
+    - CypherDSL::Renderer::Configuration::Builder#disable_dynamic_labels
+    - CypherDSL::Renderer::GeneratedNameResolver#resolve
+    - CypherDSL::Renderer::GeneratedNameResolver#resolve_alias
+    - CypherDSL::Renderer::NameResolver#resolve
+    - CypherDSL::Renderer::NameResolver#resolve_alias
+    - CypherDSL::Renderer::Visitor::Conditions#render_property_exists
+    - CypherDSL::Renderer::Visitor#resolve_name
+    - CypherDSL::StandaloneCall#as_function
+    - CypherDSL::StatementBuilder#load_csv
+    - CypherDSL::UsingPeriodicCommit#load_csv
+  ControlParameter:
+    exclude:
+    - CypherDSL::Hint#self.use_index_for
+    - CypherDSL::Renderer::GeneratedNameResolver#resolve_alias
+    - CypherDSL::Renderer::Visitor::Conditions#render_property_exists
+    - CypherDSL::VectorLiteral#self.of
+  DataClump:
+    exclude:
+    - CypherDSL::Cypher
+    - CypherDSL::Functions
+    - CypherDSL::Node
+    - CypherDSL::Relationship
+    - CypherDSL::RelationshipChain
+  DuplicateMethodCall:
+    exclude:
+    - CypherDSL::Condition#combine
+    - CypherDSL::Cypher#use
+    - CypherDSL::Hint#self.index_reference
+    - CypherDSL::Hint#self.use_index_for
+    - CypherDSL::Hint#self.use_scan_for
+    - CypherDSL::MapExpression#self.of
+    - CypherDSL::MapProjection#self.parse
+    - CypherDSL::Node#name_hint
+    - CypherDSL::RawExpression::Parser#consume
+    - CypherDSL::RawExpression::Parser#initialize
+    - CypherDSL::Renderer::GeneratedNameResolver#enter_scope
+    - CypherDSL::Renderer::GeneratedNameResolver#resolve
+    - CypherDSL::Renderer::Visitor::Conditions#render_comparison
+    - CypherDSL::Renderer::Visitor::Conditions#render_compound_condition
+    - CypherDSL::Renderer::Visitor::Expressions#render_case
+    - CypherDSL::Renderer::Visitor::Expressions#render_count
+    - CypherDSL::Renderer::Visitor::Expressions#render_entries
+    - CypherDSL::Renderer::Visitor::Expressions#render_function_invocation
+    - CypherDSL::Renderer::Visitor::Expressions#render_list_comprehension
+    - CypherDSL::Renderer::Visitor::Expressions#render_list_operator
+    - CypherDSL::Renderer::Visitor::Expressions#render_literal
+    - CypherDSL::Renderer::Visitor::Expressions#render_map_projection
+    - CypherDSL::Renderer::Visitor::Expressions#render_operation
+    - CypherDSL::Renderer::Visitor::Expressions#render_parameter
+    - CypherDSL::Renderer::Visitor::Expressions#render_pattern_comprehension
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_label_value
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_label_values
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_labels_tree
+    - CypherDSL::Renderer::Visitor::LabelRendering#static_label_names
+    - CypherDSL::Renderer::Visitor::Patterns#render_details_content
+    - CypherDSL::Renderer::Visitor::Patterns#render_length
+    - CypherDSL::Renderer::Visitor::Patterns#render_node
+    - CypherDSL::Renderer::Visitor::Patterns#render_quantified_path_pattern
+    - CypherDSL::Renderer::Visitor::Patterns#render_relationship_details
+    - CypherDSL::Renderer::Visitor#exported_names
+    - CypherDSL::Renderer::Visitor#exports_of
+    - CypherDSL::Renderer::Visitor#render
+    - CypherDSL::Renderer::Visitor#render_call
+    - CypherDSL::Renderer::Visitor#render_call_subquery
+    - CypherDSL::Renderer::Visitor#render_clause
+    - CypherDSL::Renderer::Visitor#render_hint
+    - CypherDSL::Renderer::Visitor#render_load_csv
+    - CypherDSL::Renderer::Visitor#render_match
+    - CypherDSL::Renderer::Visitor#render_projection
+    - CypherDSL::Renderer::Visitor#render_projection_item
+    - CypherDSL::Renderer::Visitor#render_search
+    - CypherDSL::Renderer::Visitor#render_with
+    - CypherDSL::Renderer::Visitor#search_options
+    - CypherDSL::Renderer::Visitor#subquery_body_and_imports
+    - CypherDSL::Search::Builder#in
+    - CypherDSL::StatementCatalog#self.from_uses
+  FeatureEnvy:
+    exclude:
+    - CypherDSL::Functions#date_components
+    - CypherDSL::ListComprehension#returning
+    - CypherDSL::Literal#initialize
+    - CypherDSL::Parameter#==
+    - CypherDSL::Renderer::Configuration#==
+    - CypherDSL::Renderer::Configuration#generated_name_flags
+    - CypherDSL::Renderer::Visitor::Conditions#render_comparison
+    - CypherDSL::Renderer::Visitor::Expressions#quantified?
+    - CypherDSL::Renderer::Visitor::Expressions#render_case
+    - CypherDSL::Renderer::Visitor::Expressions#render_list_comprehension
+    - CypherDSL::Renderer::Visitor::Expressions#render_list_operator
+    - CypherDSL::Renderer::Visitor::Expressions#render_literal
+    - CypherDSL::Renderer::Visitor::Expressions#render_operation
+    - CypherDSL::Renderer::Visitor::Expressions#render_parameter
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_label_value
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_label_values
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_labels_tree
+    - CypherDSL::Renderer::Visitor::Patterns#render_quantified_path_pattern
+    - CypherDSL::Renderer::Visitor#render_call
+    - CypherDSL::Renderer::Visitor#render_delete
+    - CypherDSL::Renderer::Visitor#render_hint
+    - CypherDSL::Renderer::Visitor#render_load_csv
+    - CypherDSL::Renderer::Visitor#render_match
+    - CypherDSL::Renderer::Visitor#render_projection
+    - CypherDSL::Renderer::Visitor#render_sort_item
+    - CypherDSL::Renderer::Visitor#search_options
+    - CypherDSL::Renderer::Visitor#subquery_body_and_imports
+    - CypherDSL::Renderer#catalog
+    - CypherDSL::Search::Builder#in
+    - CypherDSL::Search::Builder#where
+    - CypherDSL::Statement#result_statement?
+    - CypherDSL::StatementBuilder#add_hint
+    - CypherDSL::StatementBuilder#add_merge_action
+    - CypherDSL::StatementBuilder#match
+    - CypherDSL::StatementBuilder#operations_for_set
+    - CypherDSL::StatementBuilder#or
+    - CypherDSL::StatementBuilder#remove
+    - CypherDSL::StatementBuilder#unwind
+    - CypherDSL::StatementBuilder#update_last_sort_item
+    - CypherDSL::StatementBuilder#xor
+  InstanceVariableAssumption:
+    exclude:
+    - CypherDSL::Renderer::Visitor
+  LongParameterList:
+    exclude:
+    - CypherDSL::Relationship#self.create
+    - CypherDSL::Renderer::Configuration#initialize
+    - CypherDSL::Search#initialize
+    - CypherDSL::Search::Builder#initialize
+    - CypherDSL::StatementBuilder#load_csv
+    - CypherDSL::StatementBuilder#subquery_clause
+  ManualDispatch:
+    exclude:
+    - CypherDSL::Hint#self.use_join_on
+  NestedIterators:
+    exclude:
+    - CypherDSL::Cypher#node
+    - CypherDSL::Renderer::Visitor#exports_of
+    - CypherDSL::StatementBuilder#label_operation?
+  NilCheck:
+    exclude:
+    - CypherDSL::Clauses::LoadCsv#with_field_terminator
+    - CypherDSL::Comparison#initialize
+    - CypherDSL::Comparison#unary?
+    - CypherDSL::Cypher#exists
+    - CypherDSL::Functions#date_components
+    - CypherDSL::Functions#string_side
+    - CypherDSL::Functions#substring
+    - CypherDSL::Functions#temporal
+    - CypherDSL::Hint#self.use_scan_for
+    - CypherDSL::Labels#empty?
+    - CypherDSL::Labels#usable_in_update?
+    - CypherDSL::Literal#self.of
+    - CypherDSL::Node#named?
+    - CypherDSL::Parameter#anonymous?
+    - CypherDSL::RawExpression#self.create
+    - CypherDSL::Relationship#initialize
+    - CypherDSL::Relationship#named?
+    - CypherDSL::Relationship::Details#empty?
+    - CypherDSL::Relationship::Details#length?
+    - CypherDSL::Renderer::Configuration#generated_name_flags
+    - CypherDSL::Renderer::Configuration#initialize
+    - CypherDSL::Renderer::Escaper#escape_if_necessary
+    - CypherDSL::Renderer::Visitor::Expressions#quantified?
+    - CypherDSL::Renderer::Visitor::Expressions#render_literal
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_labels_tree
+    - CypherDSL::Renderer::Visitor::LabelRendering#static_renderable?
+    - CypherDSL::Renderer::Visitor::Patterns#render_length
+    - CypherDSL::Renderer::Visitor#importing_with?
+    - CypherDSL::Renderer::Visitor#render_where
+    - CypherDSL::Search::Builder#build
+    - CypherDSL::Search::Builder#for_vector
+    - CypherDSL::Search::Builder#in
+    - CypherDSL::Search::Builder#initialize
+    - CypherDSL::StatementBuilder#optional_expression
+    - CypherDSL::SymbolicName#resolved?
+    - CypherDSL::VectorLiteral#self.of
+  RepeatedConditional:
+    exclude:
+    - CypherDSL::MapProjection
+    - CypherDSL::Renderer::Visitor
+  TooManyConstants:
+    exclude:
+    - CypherDSL::Renderer::Dialect
+  TooManyInstanceVariables:
+    exclude:
+    - CypherDSL::Hint
+    - CypherDSL::Labels
+    - CypherDSL::RawExpression::Parser
+    - CypherDSL::Reduction
+    - CypherDSL::Relationship
+    - CypherDSL::Renderer::Configuration
+    - CypherDSL::Renderer::GeneratedNameResolver
+    - CypherDSL::Renderer::Visitor
+    - CypherDSL::Search
+    - CypherDSL::Search::Builder
+  TooManyMethods:
+    exclude:
+    - CypherDSL::Node
+    - CypherDSL::Relationship
+    - CypherDSL::RelationshipChain
+    - CypherDSL::Renderer::Visitor
+    - CypherDSL::StatementBuilder
+  TooManyStatements:
+    exclude:
+    - initialize
+    - CypherDSL::CompoundCondition#self.create
+    - CypherDSL::Cypher#format
+    - CypherDSL::Cypher#node
+    - CypherDSL::Hint#self.index_reference
+    - CypherDSL::Hint#self.use_index_for
+    - CypherDSL::Hint#self.use_join_on
+    - CypherDSL::Literal#self.of
+    - CypherDSL::MapExpression#self.of
+    - CypherDSL::MapProjection#self.parse
+    - CypherDSL::MapProjection#self.parse_expression
+    - CypherDSL::Renderer::Configuration#generated_name_flags
+    - CypherDSL::Renderer::GeneratedNameResolver#enter_scope
+    - CypherDSL::Renderer::GeneratedNameResolver#leave_scope
+    - CypherDSL::Renderer::GeneratedNameResolver#resolve_alias
+    - CypherDSL::Renderer::Visitor::Conditions#parenthesised?
+    - CypherDSL::Renderer::Visitor::Conditions#render_compound_condition
+    - CypherDSL::Renderer::Visitor::Expressions#render_case
+    - CypherDSL::Renderer::Visitor::Expressions#render_condition_or_operation
+    - CypherDSL::Renderer::Visitor::Expressions#render_container_expression
+    - CypherDSL::Renderer::Visitor::Expressions#render_count
+    - CypherDSL::Renderer::Visitor::Expressions#render_exists
+    - CypherDSL::Renderer::Visitor::Expressions#render_expression
+    - CypherDSL::Renderer::Visitor::Expressions#render_function_invocation
+    - CypherDSL::Renderer::Visitor::Expressions#render_literal
+    - CypherDSL::Renderer::Visitor::Expressions#render_map_projection
+    - CypherDSL::Renderer::Visitor::Expressions#render_operation
+    - CypherDSL::Renderer::Visitor::Expressions#render_pattern_comprehension
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_label_values
+    - CypherDSL::Renderer::Visitor::LabelRendering#render_labels_tree
+    - CypherDSL::Renderer::Visitor::LabelRendering#static_label_names
+    - CypherDSL::Renderer::Visitor::Patterns#render_details_content
+    - CypherDSL::Renderer::Visitor::Patterns#render_node
+    - CypherDSL::Renderer::Visitor::Patterns#render_pattern_element
+    - CypherDSL::Renderer::Visitor::Patterns#render_relationship_details
+    - CypherDSL::Renderer::Visitor#exports_of
+    - CypherDSL::Renderer::Visitor#render
+    - CypherDSL::Renderer::Visitor#render_call
+    - CypherDSL::Renderer::Visitor#render_call_subquery
+    - CypherDSL::Renderer::Visitor#render_clause
+    - CypherDSL::Renderer::Visitor#render_hint
+    - CypherDSL::Renderer::Visitor#render_in_scope
+    - CypherDSL::Renderer::Visitor#render_load_csv
+    - CypherDSL::Renderer::Visitor#render_merge
+    - CypherDSL::Renderer::Visitor#render_projection
+    - CypherDSL::Renderer::Visitor#render_projection_item
+    - CypherDSL::Renderer::Visitor#render_search
+    - CypherDSL::Renderer::Visitor#render_subquery
+    - CypherDSL::Renderer::Visitor#render_union
+    - CypherDSL::Renderer::Visitor#render_with
+    - CypherDSL::Renderer::Visitor#search_options
+    - CypherDSL::Renderer::Visitor#subquery_body_and_imports
+    - CypherDSL::StatementBuilder#match
+    - CypherDSL::StatementBuilder#operations_for_set
+    - CypherDSL::StatementCatalog#self.from_uses
+    - CypherDSL::UnionQuery#self.create
+  UncommunicativeMethodName:
+    exclude:
+    - CypherDSL::Functions#atan2
+    - CypherDSL::Functions#e
+    - CypherDSL::Functions#log10
+  UncommunicativeParameterName:
+    exclude:
+    - CypherDSL::Functions#atan2
+    - CypherDSL::Functions#cartesian
+    - CypherDSL::Functions#distance
+  UncommunicativeVariableName:
+    exclude:
+    - CypherDSL::Clauses#delete
+    - CypherDSL::Functions#distinct_function
+    - CypherDSL::Functions#function
+    - CypherDSL::Hint#self.use_index_for
+    - CypherDSL::PatternComprehension#returning
+    - CypherDSL::RawExpression::Parser#initialize
+    - CypherDSL::StandaloneCall#with_args
+  UnusedParameters:
+    exclude:
+    - CypherDSL::Renderer::NameResolver#enter_scope
+    - CypherDSL::Renderer::NameResolver#leave_scope
+    - CypherDSL::Renderer::NameResolver#resolve
+    - CypherDSL::Renderer::NameResolver#resolve_alias
+  UtilityFunction:
+    exclude:
+    - CypherDSL::Condition#pattern?
+    - CypherDSL::Functions#distinct_function
+    - CypherDSL::Functions#function
+    - CypherDSL::Functions#reduce
+    - CypherDSL::Labels#coerce
+    - CypherDSL::NoCondition#and
+    - CypherDSL::NoCondition#or
+    - CypherDSL::NoCondition#xor
+    - CypherDSL::Renderer::GeneratedNameResolver#key_of
+    - CypherDSL::Renderer::NameResolver#resolve_parameter
+    - CypherDSL::Renderer::Visitor::Conditions#parenthesised?
+    - CypherDSL::Renderer::Visitor::Conditions#raw_condition?
+    - CypherDSL::Renderer::Visitor::Expressions#pattern_body?
+    - CypherDSL::Renderer::Visitor::LabelRendering#static_renderable?
+    - CypherDSL::Renderer::Visitor::Patterns#render_length
+    - CypherDSL::Renderer::Visitor#exports_of
+    - CypherDSL::Renderer::Visitor#importing_with?
+    - CypherDSL::Renderer::Visitor#renamed_imports
+    - CypherDSL::StatementBuilder#coerce_items
+    - CypherDSL::StatementBuilder#coerce_sort_items
+    - CypherDSL::StatementBuilder#label_operation?
+    - CypherDSL::StatementBuilder#operation?
+    - CypherDSL::StatementBuilder#optional_expression

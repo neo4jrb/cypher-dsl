@@ -1,0 +1,35 @@
+module CypherDSL
+  # A literal value rendered inline: strings, numbers, booleans, NULL, dates and
+  # times. Hashes become a {MapExpression}, arrays a {ListExpression}; expressions
+  # are returned unchanged.
+  class Literal
+    include Expression
+
+    SUPPORTED_TYPES: Array[Class]
+
+    attr_reader value: literal_value
+
+    def self.of: (Expression value) -> Expression
+               | (Hash[String | Symbol, expression_like] value) -> MapExpression
+               | (Array[expression_like] value) -> ListExpression
+               | (literal_value value) -> Literal
+               | (expression_like value) -> Expression
+
+    # `'…'`, with backslashes and quotes escaped; `nil` quotes to `''`.
+    def self.quote: (String? string) -> String
+
+    # The content of a string literal: backslashes, single and double quotes get a backslash.
+    def self.escape_string: (String? string) -> String?
+
+    def initialize: (literal_value value) -> void
+
+    # The literal as Cypher, as the Java `Literal#asString`.
+    def as_string: () -> String
+
+    TRUE: Literal
+
+    FALSE: Literal
+
+    NULL: Literal
+  end
+end

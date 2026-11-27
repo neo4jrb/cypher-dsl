@@ -1,0 +1,13 @@
+module CypherDSL
+  module Clauses
+    # A clause rendered verbatim from a {RawExpression}: the escape hatch for
+    # Cypher the builder does not model (`raw_clause('CALL db.labels()')`).
+    class Raw < Data
+      attr_reader expression: RawExpression
+
+      def self.new: (expression: RawExpression) -> instance
+
+      def with: (?expression: RawExpression) -> instance
+    end
+  end
+end

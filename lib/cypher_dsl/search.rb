@@ -72,6 +72,8 @@ module CypherDSL
       def score(name) = with(score_name: SymbolicName.of(name))
 
       def build
+        # @type ivar @index_name: String
+        # @type ivar @vector: vector
         raise ArgumentError, 'The index name is required' if @index_name.nil?
         raise ArgumentError, 'The vector is required' if @vector.nil?
 

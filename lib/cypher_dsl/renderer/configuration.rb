@@ -16,7 +16,9 @@ module CypherDSL
     class Configuration
       # The Java `GeneratedNames` enum: which names get rewritten. `reuse_aliases` makes an alias
       # that is defined again reuse its generated name instead of getting a new one.
-      GENERATED_NAMES = %i[entity_names parameter_names all_aliases internal_aliases_only reuse_aliases].freeze
+      GENERATED_NAMES = %i[
+        entity_names parameter_names all_aliases internal_aliases_only reuse_aliases
+      ].freeze #: Array[generated_name]
 
       attr_reader :always_escape_names, :dialect, :pretty_print, :indent_size, :indent_style, :disable_dynamic_labels,
                   :generated_names
@@ -110,13 +112,13 @@ module CypherDSL
       def generated_name_flags(value)
         flags = case value
                 when true then GENERATED_NAMES
-                when false, nil then []
+                when false, nil then [] # steep:ignore UnannotatedEmptyCollection
                 else value.to_a.map(&:to_sym)
                 end
         unknown = flags - GENERATED_NAMES
         raise ArgumentError, "Unknown generated name flags #{unknown.inspect}" unless unknown.empty?
 
-        flags.to_set.freeze
+        flags.to_set.freeze #: Set[generated_name]
       end
     end
   end

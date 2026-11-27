@@ -1,0 +1,35 @@
+module CypherDSL
+  class Renderer
+    class Visitor
+      # Rendering of comparisons and compound conditions.
+      module Conditions : _VisitorInternals
+        @configuration: Configuration
+        @level: Integer
+
+        # Shared with the other mixins (private in Ruby, see _VisitorInternals).
+        # untyped: a `Comparison`; its `right` operand is nil exactly when `unary?`, which Steep
+        # cannot derive from the predicate.
+        def render_comparison: (untyped comparison) -> String
+
+        # Pretty printed, each further operand starts an indented line: `(a\n  AND b)`.
+        def render_compound_condition: (CompoundCondition condition) -> String
+
+        # `exists(n.prop)` on Neo4j 4, `n.prop IS NOT NULL` afterwards.
+        def render_property_exists: (PropertyExistsCondition condition, ?negated: bool) -> String
+
+        private
+
+        # A comparison nested inside another comparison is parenthesised: `(1 > 2) = true`.
+        def render_operand: (Expression expression) -> String
+
+        # A raw operand is parenthesised unless it already is one group.
+        def render_compound_operand: (Condition condition) -> String
+
+        def raw_condition?: (Condition condition) -> bool
+
+        # True when the text is one parenthesised group: `(a OR b)` but not `(a) OR (b)`.
+        def parenthesised?: (String text) -> bool
+      end
+    end
+  end
+end

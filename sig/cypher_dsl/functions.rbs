@@ -1,0 +1,245 @@
+module CypherDSL
+  # Factory methods for Cypher's built-in functions, mixed into {Cypher}
+  # (`Cypher.to_upper(name)`, `Cypher.date(year: …)`). Names follow the Java
+  # `Functions` class in snake_case; `*_distinct` variants render `DISTINCT`
+  # inside the call. Arguments are coerced, so plain strings and numbers become
+  # literals and `nil` becomes `NULL`.
+  module Functions
+    # A call of any function with the given arguments, coerced to expressions.
+    def function: (String name, *expression_like arguments) -> FunctionInvocation
+
+    # --- strings ---------------------------------------------------------
+
+    def left: (expression_like expression, expression_like length) -> FunctionInvocation
+
+    def right: (expression_like expression, expression_like length) -> FunctionInvocation
+
+    def ltrim: (expression_like expression) -> FunctionInvocation
+
+    def rtrim: (expression_like expression) -> FunctionInvocation
+
+    def trim: (expression_like expression) -> FunctionInvocation
+
+    def to_lower: (expression_like expression) -> FunctionInvocation
+
+    def to_upper: (expression_like expression) -> FunctionInvocation
+
+    def reverse: (expression_like expression) -> FunctionInvocation
+
+    def replace: (expression_like original, expression_like search, expression_like replacement) -> FunctionInvocation
+
+    def split: (expression_like expression, expression_like delimiter) -> FunctionInvocation
+
+    def to_string_or_null: (expression_like expression) -> FunctionInvocation
+
+    def substring: (expression_like original, expression_like start, ?expression_like length) -> FunctionInvocation
+
+    # --- aggregates ------------------------------------------------------
+
+    def avg: (expression_like expression) -> FunctionInvocation
+
+    def avg_distinct: (expression_like expression) -> FunctionInvocation
+
+    def collect: (expression_like expression) -> FunctionInvocation
+
+    def collect_distinct: (expression_like expression) -> FunctionInvocation
+
+    def count: (expression_like expression) -> FunctionInvocation
+
+    def count_distinct: (expression_like expression) -> FunctionInvocation
+
+    def max: (expression_like expression) -> FunctionInvocation
+
+    def max_distinct: (expression_like expression) -> FunctionInvocation
+
+    def min: (expression_like expression) -> FunctionInvocation
+
+    def min_distinct: (expression_like expression) -> FunctionInvocation
+
+    def sum: (expression_like expression) -> FunctionInvocation
+
+    def sum_distinct: (expression_like expression) -> FunctionInvocation
+
+    def percentile_cont: (expression_like expression, expression_like percentile) -> FunctionInvocation
+
+    def percentile_cont_distinct: (expression_like expression, expression_like percentile) -> FunctionInvocation
+
+    def percentile_disc: (expression_like expression, expression_like percentile) -> FunctionInvocation
+
+    def percentile_disc_distinct: (expression_like expression, expression_like percentile) -> FunctionInvocation
+
+    def st_dev: (expression_like expression) -> FunctionInvocation
+
+    def st_dev_distinct: (expression_like expression) -> FunctionInvocation
+
+    def st_dev_p: (expression_like expression) -> FunctionInvocation
+
+    def st_dev_p_distinct: (expression_like expression) -> FunctionInvocation
+
+    # --- lists, paths and entities ---------------------------------------
+
+    def head: (expression_like expression) -> FunctionInvocation
+
+    def last: (expression_like expression) -> FunctionInvocation
+
+    def tail: (expression_like expression) -> FunctionInvocation
+
+    def keys: (expression_like expression) -> FunctionInvocation
+
+    def properties: (expression_like expression) -> FunctionInvocation
+
+    # At least one expression is required.
+    def coalesce: (*expression_like expressions) -> FunctionInvocation
+
+    def is_empty: (expression_like expression) -> FunctionInvocation
+
+    def range: (expression_like start_value, expression_like end_value, ?expression_like step) -> FunctionInvocation
+
+    # The path, node or relationship functions take the named element and render its name, as in Java.
+    # The element helpers also take a `SymbolicName` standing for the path, node or relationship.
+    def nodes: (NamedPath | SymbolicName path) -> FunctionInvocation
+
+    def relationships: (NamedPath | SymbolicName path) -> FunctionInvocation
+
+    def length: (NamedPath | SymbolicName path) -> FunctionInvocation
+
+    def labels: (Node | SymbolicName node) -> FunctionInvocation
+
+    def type: (Relationship | SymbolicName relationship) -> FunctionInvocation
+
+    def start_node: (Relationship | SymbolicName relationship) -> FunctionInvocation
+
+    def end_node: (Relationship | SymbolicName relationship) -> FunctionInvocation
+
+    def element_id: (Node | Relationship | SymbolicName element) -> FunctionInvocation
+
+    # `id(n)`; deprecated in Neo4j 5 in favour of {#element_id}, kept for parity.
+    def id: (Node | Relationship | SymbolicName element) -> FunctionInvocation
+
+    # `reduce(acc = initial, x IN list | mapper)`, built as
+    # `reduce(:x).in(list).map(mapper).accumulate_on(acc).with_initial_value_of(0)`.
+    def reduce: (name_like variable) -> Reduction::Ongoing
+
+    # --- scalars and conversions -----------------------------------------
+
+    def to_integer: (expression_like expression) -> FunctionInvocation
+
+    def to_float: (expression_like expression) -> FunctionInvocation
+
+    def to_string: (expression_like expression) -> FunctionInvocation
+
+    def to_boolean: (expression_like expression) -> FunctionInvocation
+
+    def random_uuid: () -> FunctionInvocation
+
+    # `linenumber()` and `file()`, available inside LOAD CSV.
+    def linenumber: () -> FunctionInvocation
+
+    def file: () -> FunctionInvocation
+
+    # --- mathematical ----------------------------------------------------
+
+    def abs: (expression_like expression) -> FunctionInvocation
+
+    def ceil: (expression_like expression) -> FunctionInvocation
+
+    def floor: (expression_like expression) -> FunctionInvocation
+
+    def sign: (expression_like expression) -> FunctionInvocation
+
+    def exp: (expression_like expression) -> FunctionInvocation
+
+    def log: (expression_like expression) -> FunctionInvocation
+
+    def log10: (expression_like expression) -> FunctionInvocation
+
+    def sqrt: (expression_like expression) -> FunctionInvocation
+
+    def acos: (expression_like expression) -> FunctionInvocation
+
+    def asin: (expression_like expression) -> FunctionInvocation
+
+    def atan: (expression_like expression) -> FunctionInvocation
+
+    def atan2: (expression_like y, expression_like x) -> FunctionInvocation
+
+    def cos: (expression_like expression) -> FunctionInvocation
+
+    def cot: (expression_like expression) -> FunctionInvocation
+
+    def degrees: (expression_like expression) -> FunctionInvocation
+
+    def haversin: (expression_like expression) -> FunctionInvocation
+
+    def radians: (expression_like expression) -> FunctionInvocation
+
+    def sin: (expression_like expression) -> FunctionInvocation
+
+    def tan: (expression_like expression) -> FunctionInvocation
+
+    def e: () -> FunctionInvocation
+
+    def pi: () -> FunctionInvocation
+
+    def rand: () -> FunctionInvocation
+
+    # `round(value)`, `round(value, precision)` or `round(value, precision, mode)`.
+    def round: (expression_like value, *expression_like arguments) -> FunctionInvocation
+
+    # --- spatial ---------------------------------------------------------
+
+    def point: (expression_like expression) -> FunctionInvocation
+
+    def cartesian: (expression_like x, expression_like y) -> FunctionInvocation
+
+    def coordinate: (expression_like longitude, expression_like latitude) -> FunctionInvocation
+
+    def within_bbox: (expression_like point, expression_like lower_left, expression_like upper_right) -> FunctionInvocation
+
+    # `distance(a, b)`; rendered as `point.distance(a, b)` on Neo4j 5.
+    def distance: (expression_like point1, expression_like point2) -> FunctionInvocation
+
+    # --- temporal --------------------------------------------------------
+
+    # `date()`, `date('2020-09-15')`, `date({year: 2020})`, `date($p)` or `date(timezone: 'Europe/Berlin')`;
+    # the same for datetime, localdatetime, localtime and time. A value and a timezone exclude each other.
+    def date: (?expression_like value, ?timezone: String?) -> FunctionInvocation
+
+    def datetime: (?expression_like value, ?timezone: String?) -> FunctionInvocation
+
+    def localdatetime: (?expression_like value, ?timezone: String?) -> FunctionInvocation
+
+    def localtime: (?expression_like value, ?timezone: String?) -> FunctionInvocation
+
+    def time: (?expression_like value, ?timezone: String?) -> FunctionInvocation
+
+    def duration: (expression_like value) -> FunctionInvocation
+
+    def calendar_date: (expression_like year, ?expression_like month, ?expression_like day) -> FunctionInvocation
+
+    def week_date: (expression_like year, ?expression_like week, ?expression_like day_of_week) -> FunctionInvocation
+
+    def ordinal_date: (expression_like year, ?expression_like ordinal_day) -> FunctionInvocation
+
+    def quarter_date: (expression_like year, ?expression_like quarter, ?expression_like day_of_quarter) -> FunctionInvocation
+
+    # --- graphs (composite databases) ------------------------------------
+
+    def graph_names: () -> FunctionInvocation
+
+    def graph_properties_by_name: (expression_like name) -> FunctionInvocation
+
+    def graph_by_name: (expression_like name) -> FunctionInvocation
+
+    private
+
+    def distinct_function: (String name, *expression_like arguments) -> FunctionInvocation
+
+    def string_side: (String name, expression_like expression, expression_like length) -> FunctionInvocation
+
+    def temporal: (String name, expression_like value, String? timezone) -> FunctionInvocation
+
+    # The components of a date literal map, `nil` ones dropped; `year` is required.
+    def date_components: (**expression_like components) -> MapExpression
+  end
+end

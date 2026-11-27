@@ -1,0 +1,11 @@
+module CypherDSL
+  # Raised when one parameter name is bound to different values within a
+  # statement, or bound in one place and left unbound in another.
+  class ConflictingParametersException < StandardError
+    # `name => Set` of the conflicting values; an unbound use is {Parameter::NO_VALUE}.
+    # untyped: the set holds arbitrary parameter values.
+    attr_reader erroneous_parameters: Hash[String, Set[untyped]]
+
+    def initialize: (Hash[String, Set[untyped]] erroneous_parameters) -> void
+  end
+end

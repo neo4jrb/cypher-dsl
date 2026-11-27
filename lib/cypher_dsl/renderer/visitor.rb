@@ -135,7 +135,7 @@ module CypherDSL
       end
 
       def render_load_csv(clause)
-        parts = []
+        parts = [] #: Array[String]
         if clause.periodic_commit
           rate = clause.periodic_commit == true ? '' : " #{clause.periodic_commit}"
           parts << "USING PERIODIC COMMIT#{rate}"
@@ -181,7 +181,8 @@ module CypherDSL
       def exports_of(body)
         return [] unless body.is_a?(Statement) && body.clauses.last.is_a?(Clauses::Return)
 
-        items = body.clauses.last.items
+        # The last clause was checked to be a RETURN above; Steep does not retain a chained `is_a?`.
+        items = body.clauses.last.items # steep:ignore NoMethod
         return :all if items.any?(Asterisk)
 
         items.select { |item| [SymbolicName, AliasedExpression, Node, Relationship].any? { |type| item.is_a?(type) } }
@@ -195,6 +196,8 @@ module CypherDSL
         return renamed_imports(body, clause.imports) if clause.imports.any?
         return [body, []] if body.is_a?(RawExpression) || body.is_a?(UnionQuery)
 
+        # `importing_with?` is a predicate Steep cannot narrow by.
+        # @type var first: untyped
         first = body.clauses.first
         return [body, []] unless importing_with?(first)
 
